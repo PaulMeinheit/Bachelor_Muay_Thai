@@ -1,0 +1,34 @@
+Open Questions:
+Is there a way to mathematically describe covering UP?
+Is there  a way for theia to get me contact relations/times?
+
+
+Interesting variables to analyze
+
+  Left elbow:
+    Jans Stability metric
+    elbow speed at impact
+    
+Uppercut:
+    Jans Stability metric
+    Wrist Speed
+    distance from wrist to thorax
+    Speed of retraction
+    pelvis rotation
+
+  Teep:
+    Jans Stability metric
+    COM Movement
+    Hip displacement to the front
+    Retraction after impact
+    discrepancy in start and landing position
+    Time spent in air before/after impact
+    ankle velocity at impact
+
+  Kick:
+    Jans Stability metric
+    Duration of kicking phases
+    Toe velocity at impact
+    COM movement
+    
+    
