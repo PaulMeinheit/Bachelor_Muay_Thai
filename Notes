@@ -1,13 +1,17 @@
 Open Questions:
 Is there a way to mathematically describe covering UP?
 Is there  a way for theia to get me contact relations/times?
-
+Is there a nice way to modell weight transfer
 
 Interesting variables to analyze
 
   Left elbow:
     Jans Stability metric
     elbow speed at impact
+    pelvis rotation
+    Weight transfer
+    (Speed of retraction not necessary -> grabs or furtehr elbows)
+    (blocking with other hand)
     
 Uppercut:
     Jans Stability metric
@@ -15,6 +19,8 @@ Uppercut:
     distance from wrist to thorax
     Speed of retraction
     pelvis rotation
+    Weight transfer
+    (blocking with other hand)
 
   Teep:
     Jans Stability metric
@@ -24,11 +30,17 @@ Uppercut:
     discrepancy in start and landing position
     Time spent in air before/after impact
     ankle velocity at impact
+    (block not so relevant)
 
   Kick:
     Jans Stability metric
-    Duration of kicking phases
+    Duration of kicking phases ( preparation, execution, impac, recovery)
+    knee angle at impact
+    angle of shin on impact
+    hip rotation
     Toe velocity at impact
     COM movement
+    (blocking with non kickinng side hand)
+
     
     
