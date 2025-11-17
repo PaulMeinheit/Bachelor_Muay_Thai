@@ -1,4 +1,4 @@
-Open Questions:
+ Open Questions:
 Is there a way to mathematically describe covering UP?
 Is there  a way for theia to get me contact relations/times?
 Is there a nice way to modell weight transfer?
@@ -8,8 +8,9 @@ How do i understand total body angular momentum?
 Interesting variables to analyze:
 
   Left elbow:
-    Jans Stability metric
-    elbow speed at impact
+    Jans Stability Measure
+    elbow speed at impact velocity overall
+    elbow trajectory
     pelvis rotation
     Weight transfer
     elbow angle at impact
@@ -20,7 +21,6 @@ Uppercut:
     Jans Stability metric
     Wrist Speed
     distance from wrist to thorax
-    Speed of retraction
     pelvis rotation
     Weight transfer
     (blocking with other hand)
@@ -28,19 +28,23 @@ Uppercut:
   Teep:
     Jans Stability metric
     COM Movement
-    Hip displacement to the front
+    Pelvis movement( maybe hip joint centre) to the front teepin hip
+    Time Retraction after impact
     discrepancy in start and landing position
-    Time spent in air before/after impact
-    ankle velocity at impact
+    Time spent in air before/after impact(phases)
+    ankle velocity
     (block not so relevant)
 
   Kick:
-    Jans Stability metric
-    Duration of kicking phases ( preparation, execution, impact, recovery)
-    acceleration of hip knee and ankle
+    Jans Stability Measure
+Angular momentum full body and all bodyparts about each axis
+Rate of chnage of total angular momnetum with respect to full body com about each axis
+for all motions
+    Duration of kicking phases ( preparation, execution, impac, recovery)
+    knee angle at impact
     angle of shin on impact
     hip rotation
-    Toe velocity at impact
+    Ankle velocity at impact
     COM movement
     discrepancy in start and landing position
     (blocking with non kicking side hand)
