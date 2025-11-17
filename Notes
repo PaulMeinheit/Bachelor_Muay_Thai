@@ -5,14 +5,15 @@ Is there a nice way to modell weight transfer?
 How do i understand total body angular momentum?
 
 
-Interesting variables to analyze
+Interesting variables to analyze:
 
   Left elbow:
     Jans Stability metric
     elbow speed at impact
     pelvis rotation
     Weight transfer
-    (Speed of retraction not necessary -> grabs or furtehr elbows)
+    elbow angle at impact
+    (Speed of retraction not necessary -> unnatural usually clinch or further elbows)
     (blocking with other hand)
     
 Uppercut:
@@ -28,7 +29,6 @@ Uppercut:
     Jans Stability metric
     COM Movement
     Hip displacement to the front
-    Retraction after impact
     discrepancy in start and landing position
     Time spent in air before/after impact
     ankle velocity at impact
@@ -36,13 +36,14 @@ Uppercut:
 
   Kick:
     Jans Stability metric
-    Duration of kicking phases ( preparation, execution, impac, recovery)
-    knee angle at impact
+    Duration of kicking phases ( preparation, execution, impact, recovery)
+    acceleration of hip knee and ankle
     angle of shin on impact
     hip rotation
     Toe velocity at impact
     COM movement
-    (blocking with non kickinng side hand)
+    discrepancy in start and landing position
+    (blocking with non kicking side hand)
 
     
     
