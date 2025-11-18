@@ -9,8 +9,8 @@ def sliceData(dataPath, outputPath, segemnt_frames):
     internalFolder = os.path.join(outputPath,dataPath)
     os.makedirs(internalFolder)
     ##slicing the data into the 10 respective trials
-    for  i in range(9):
-        temp = data.iloc[segemnt_frames[i]:segemnt_frames[i+1]]
+    for  i in range(len(segemnt_frames)):
+        temp = data.iloc[segemnt_frames[i-1]:segemnt_frames[i]]
         tempname ="sliced" + str(i) + ".csv"
         open(os.path.join(internalFolder, tempname), "x")
         
