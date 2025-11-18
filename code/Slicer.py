@@ -3,17 +3,17 @@ import Dataloader
 import os
 
 
-def segmentData(dataPath, outputPath, segemnt_frames,trialName):
+def sliceData(dataPath, outputPath, segemnt_frames):
 
     data = Dataloader.loadData(dataPath)
-    os.mkdir(outputPath)
-    
+    internalFolder = os.path.join(outputPath,dataPath)
+    os.makedirs(internalFolder)
     ##slicing the data into the 10 respective trials
     for  i in range(9):
         temp = data.iloc[segemnt_frames[i]:segemnt_frames[i+1]]
-        tempname =trialName + str(i) + ".csv"
-        f = open(os.path.join(outputPath, tempname), "x")
+        tempname ="sliced" + str(i) + ".csv"
+        open(os.path.join(internalFolder, tempname), "x")
         
-        temp.to_csv(os.path.join(outputPath, tempname), sep=",", index = False)
+        temp.to_csv(os.path.join(internalFolder, tempname), sep=",", index = False)
 
 

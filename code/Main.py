@@ -1,7 +1,12 @@
-import code.Slicer as Slicer
-filePath = "Sub01_Teep/JointAngles.txt"
+import Slicer
+import os
+
+dirPath = "Sub01_Teep"
 resultPath = "results"
 segmentframes = [0,100,200,300,400,500,600,700,800,900]
-trialName = "Sub01_Teep_finishedJointAngles"
-Slicer.segmentData(filePath,resultPath,segmentframes,trialName)
+
+
+os.mkdir(resultPath)
+for file in os.listdir(dirPath):
+    Slicer.sliceData(os.path.join(dirPath,file),resultPath,segmentframes)
 
