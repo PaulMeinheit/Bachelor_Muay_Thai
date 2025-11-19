@@ -12,7 +12,6 @@ def findTeepSegments(groundReactionPath,impactFrames,segmentBeginFrames):
         
         Liftthreshold = 8
         col = ("FP1", "Z")
-        print(data[col])
         mask = data[col] < Liftthreshold
         liftOffFrame = mask.idxmax() if mask.any() else None
         print(liftOffFrame)
