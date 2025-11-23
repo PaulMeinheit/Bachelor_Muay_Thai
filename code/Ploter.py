@@ -5,15 +5,16 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # needed for 3D plots
 
 
-data = Dataloader.loadDataNoSkip("AveragedResults/JointPositions.txt.csv")
-AnkleData = data["L_ANKLE_POSITION"]
+data = Dataloader.loadDataNoSkip("AveragedResults/CoG_Position.txt.csv")
+dataToPlot = data["FullBody_CoG_pos"]
 
 # Create a 3D figure
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 
 # Plot points
-ax.scatter(AnkleData['X'], AnkleData['Y'], AnkleData['Z'], c='blue', marker='o')
+ax.scatter(dataToPlot['X'], dataToPlot['Y'], dataToPlot['Z'], c='red', marker='o')
+ax.margins(x=1,z=2)
 
 # Label axes
 ax.set_xlabel('X')
