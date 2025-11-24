@@ -8,6 +8,7 @@ __pycache__/
 slicedResults/
 scaledResults/
 AveragedResults/
+plots/
 # Distribution / packaging
 .Python
 build/
