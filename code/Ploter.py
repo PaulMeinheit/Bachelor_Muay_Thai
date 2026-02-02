@@ -67,3 +67,40 @@ os.makedirs("plots", exist_ok=True)                    # create folder if missin
 out_path = os.path.join("plots", "L_ANKLE_POSITION_plot.png")
 fig.savefig(out_path, dpi=300, bbox_inches='tight')    # save high-res PNG
 plt.show()
+
+# load averaged data
+df = Dataloader.loadDataNoSkip("AveragedResults/JointPositions.txt.csv")
+
+# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
+z = df[("L_HIP_POSITION", "X")]
+
+# Simple plot
+plt.figure(figsize=(10, 4))
+plt.plot(z.index, z.values, label="X")
+plt.title("X position of L_HIP over time")
+plt.grid(True)
+plt.legend()
+plt.show()
+# Save plot
+# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
+z = df[("L_HIP_POSITION", "Y")]
+
+# Simple plot
+plt.figure(figsize=(10, 4))
+plt.plot(z.index, z.values, label="Y")
+plt.title("Y position of L_HIP over time")
+plt.grid(True)
+plt.legend()
+plt.show()
+# Save plot
+# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
+z = df[("L_HIP_POSITION", "Z")]
+
+# Simple plot
+plt.figure(figsize=(10, 4))
+plt.plot(z.index, z.values, label="Z")
+plt.title("Z position of L_HIP over time")
+plt.grid(True)
+plt.legend()
+plt.show()
+# Save plot
