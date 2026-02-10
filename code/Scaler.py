@@ -66,31 +66,43 @@ def spline_interpolate_df(df, new_length, k=3):
     return pd.DataFrame(out, columns=df.columns)
 
 def scaleToFourPhases(dict,segments,scaledResultPath,directory):
-    framesToScaleTo = 500
+    framesToScaleTo = 480  # 4 phases of 120 frames each
     internalFolder = os.path.join(scaledResultPath,directory)
     os.makedirs(internalFolder)
-    avgRatios = calculateAverageSegementRatios(segments)
-    for i in range (len(dict)):
-        dataToScale = dict[i]
-        dataToScale = dataToScale.drop(dataToScale.columns[0], axis=1)
-        #phase1_scaling
-        phase1_end = int(avgRatios[0] * framesToScaleTo)
-        phase1_data = dataToScale.iloc[0:segments[i][1]]
-        phase1_scaled = spline_interpolate_df(phase1_data, phase1_end)
-        #phase2_scaling
-        phase2_end = int(avgRatios[1] * framesToScaleTo)
-        phase2_data = dataToScale.iloc[segments[i][1]:segments[i][2]]
-        phase2_scaled = spline_interpolate_df(phase2_data, phase2_end - phase1_end)
-        #phase3_scaling
-        phase3_end = int(avgRatios[2] * framesToScaleTo)
-        phase3_data = dataToScale.iloc[segments[i][2]:segments[i][3]]
-        phase3_scaled = spline_interpolate_df(phase3_data, phase3_end - phase2_end)
-        #phase4_scaling
-        phase4_end = framesToScaleTo
-        phase4_data = dataToScale.iloc[segments[i][3]:segments[i][4]]
-        phase4_scaled = spline_interpolate_df(phase4_data, phase4_end - phase3_end)
-        #concat phases
-        finalScaledData= pd.concat([phase1_scaled,phase2_scaled,phase3_scaled,phase4_scaled], ignore_index=True)
-        tempname ="scaled" + str(i) + ".csv"
+
+    def _safe_spline(segment_df, out_len):
+        if out_len <= 0:
+            return pd.DataFrame(columns=segment_df.columns)
+        n = len(segment_df)
+        if n == 0:
+            return pd.DataFrame(np.nan, index=range(out_len), columns=segment_df.columns)
+        if n == 1:
+            row = segment_df.iloc[0].values
+            arr = np.tile(row, (out_len, 1))
+            return pd.DataFrame(arr, columns=segment_df.columns)
+        return spline_interpolate_df(segment_df, out_len)
+
+    for i in range(len(dict)):
+        dataToScale = dict[i].drop(dict[i].columns[0], axis=1)
+
+        # fixed phase proportions: 0-0.25, 0.25-0.5, 0.5-0.75, 0.75-1
+        base_len = int(framesToScaleTo * 0.25)
+        segment_lengths = [base_len, base_len, base_len, base_len]
+        # adjust last segment to ensure total equals framesToScaleTo
+        segment_lengths[-1] += framesToScaleTo - sum(segment_lengths)
+
+        # extract segments using provided indices in `segments`
+        p1_df = dataToScale.iloc[0:segments[i][1]]
+        p2_df = dataToScale.iloc[segments[i][1]:segments[i][2]]
+        p3_df = dataToScale.iloc[segments[i][2]:segments[i][3]]
+        p4_df = dataToScale.iloc[segments[i][3]:segments[i][4]]
+
+        p1_scaled = _safe_spline(p1_df, segment_lengths[0])
+        p2_scaled = _safe_spline(p2_df, segment_lengths[1])
+        p3_scaled = _safe_spline(p3_df, segment_lengths[2])
+        p4_scaled = _safe_spline(p4_df, segment_lengths[3])
+
+        finalScaledData = pd.concat([p1_scaled, p2_scaled, p3_scaled, p4_scaled], ignore_index=True)
+        tempname = "scaled" + str(i) + ".csv"
         open(os.path.join(internalFolder, tempname), "x")
-        finalScaledData.to_csv(os.path.join(internalFolder, tempname), sep=",", index = False)
+        finalScaledData.to_csv(os.path.join(internalFolder, tempname), sep=",", index=False)
