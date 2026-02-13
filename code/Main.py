@@ -4,7 +4,7 @@ import Scaler
 import Averager
 import matplotlib.pyplot as plt
 
-trialPath ="E_01/E_01_Teep"
+trialPath ="/E1/teep"
 dataPath = os.path.join("Raw_Data", trialPath)
 SlicedResultsPath = "processed_Data/" +trialPath + "/sliced"
 scaledResultPath = "processed_Data/" + trialPath + "/scaled"
