@@ -6,7 +6,7 @@ import os
 def sliceData(dataPath, outputPath, segemnt_frames):
 
     data = Dataloader.loadData(dataPath)
-    internalFolder = os.path.join(outputPath,dataPath)
+    internalFolder = os.path.join(outputPath)
     os.makedirs(internalFolder)
     ##slicing the data into the 10 respective trials
     for  i in range(len(segemnt_frames)-2):
@@ -16,12 +16,9 @@ def sliceData(dataPath, outputPath, segemnt_frames):
         
         temp.to_csv(os.path.join(internalFolder, tempname), sep=",", index = False)
 
-def calcBeginnframe(liftOffFrame):
-    beginnframe = []
-    for i in liftOffFrame.size():
-        beginnframe[i] = (liftOffFrame[i]- 100)
-    return beginnframe
 
+def calcBeginnframe(liftOffFrame):
+    return [frame - 75 for frame in liftOffFrame]
 
 def findTeepSegments(groundReactionPath, liftOffFrames, impactFrames, footDownFrames):
     """
