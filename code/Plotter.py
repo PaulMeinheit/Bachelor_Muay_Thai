@@ -5,102 +5,40 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # needed for 3D plots
 import os
 
-data = Dataloader.loadDataNoSkip("AveragedResults/CoG_Position.txt.csv")
-dataToPlot = data["FullBody_CoG_pos"]
+data = Dataloader.loadDataNoSkip("processed_Data/E1/roundhouse/scaled/AngMoms_wrt_LAB/scaled2.csv")
+dataToPlot = data["FullBody_AngMom"]
 
-# Create a 3D figure
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
+# Extract X, Y, Z values
+x_values = dataToPlot.iloc[:, 0]
+y_values = dataToPlot.iloc[:, 1]
+z_values = dataToPlot.iloc[:, 2]
 
-# Plot points
-ax.scatter(dataToPlot['X'], dataToPlot['Y'], dataToPlot['Z'], c='red', marker='o')
-ax.margins(x=1,z=2)
+# Create figure with 3 subplots
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 
-# Label axes
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
+# Plot X component
+axes[0].plot(x_values, label='X', color='red')
+axes[0].set_xlabel('Frame')
+axes[0].set_ylabel('Angular Momentum (X)')
+axes[0].set_title('Angular Momentum - X Direction')
+axes[0].grid(True)
+axes[0].legend()
 
-os.makedirs("plots", exist_ok=True)                    # create folder if missing
-out_path = os.path.join("plots", "CoG_plot.png")       # file name + folder
-fig.savefig(out_path, dpi=300, bbox_inches='tight')    # save high-res PNG
+# Plot Y component
+axes[1].plot(y_values, label='Y', color='green')
+axes[1].set_xlabel('Frame')
+axes[1].set_ylabel('Angular Momentum (Y)')
+axes[1].set_title('Angular Momentum - Y Direction')
+axes[1].grid(True)
+axes[1].legend()
+
+# Plot Z component
+axes[2].plot(z_values, label='Z', color='blue')
+axes[2].set_xlabel('Frame')
+axes[2].set_ylabel('Angular Momentum (Z)')
+axes[2].set_title('Angular Momentum - Z Direction')
+axes[2].grid(True)
+axes[2].legend()
+
+plt.tight_layout()
 plt.show()
-
-
-# load averaged data
-df = Dataloader.loadDataNoSkip("AveragedResults/GRF_filtered12hz_resampled120hz.txt.csv")
-
-# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
-z = df[("FP2", "Z")]
-
-# Simple plot
-plt.figure(figsize=(10, 4))
-plt.plot(z.index, z.values, label="FP2 Z")
-plt.xlabel("Frame")
-plt.ylabel("Z (force)")
-plt.title("FP2 Z time-series")
-plt.grid(True)
-plt.legend()
-plt.show()
-# Save plot
-plt.savefig(os.path.join("plots", "FP2_Z_plot.png"), dpi=300, bbox_inches='tight')
-
-
-data = Dataloader.loadDataNoSkip("AveragedResults/JointPositions.txt.csv")
-dataToPlot = data["L_ANKLE_POSITION"]
-
-# Create a 3D figure
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-
-# Plot points
-ax.scatter(dataToPlot['X'], dataToPlot['Y'], dataToPlot['Z'], c='blue', marker='o')
-ax.margins(x=1,z=2)
-
-# Label axes
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-
-#save plot
-os.makedirs("plots", exist_ok=True)                    # create folder if missing
-out_path = os.path.join("plots", "L_ANKLE_POSITION_plot.png")
-fig.savefig(out_path, dpi=300, bbox_inches='tight')    # save high-res PNG
-plt.show()
-
-# load averaged data
-df = Dataloader.loadDataNoSkip("AveragedResults/JointPositions.txt.csv")
-
-# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
-z = df[("L_HIP_POSITION", "X")]
-
-# Simple plot
-plt.figure(figsize=(10, 4))
-plt.plot(z.index, z.values, label="X")
-plt.title("X position of L_HIP over time")
-plt.grid(True)
-plt.legend()
-plt.show()
-# Save plot
-# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
-z = df[("L_HIP_POSITION", "Y")]
-
-# Simple plot
-plt.figure(figsize=(10, 4))
-plt.plot(z.index, z.values, label="Y")
-plt.title("Y position of L_HIP over time")
-plt.grid(True)
-plt.legend()
-plt.show()
-# Save plot
-# If your DataFrame has MultiIndex columns (level0=sensor, level1=axis) access with a tuple:
-z = df[("L_HIP_POSITION", "Z")]
-
-# Simple plot
-plt.figure(figsize=(10, 4))
-plt.plot(z.index, z.values, label="Z")
-plt.title("Z position of L_HIP over time")
-plt.grid(True)
-plt.legend()
-plt.show()
-# Save plot

@@ -24,7 +24,7 @@ def sliceData(dataPath, outputPath, segemnt_frames):
 def calcBeginnframe(liftOffFrame):
     return [frame - 75 for frame in liftOffFrame]
 
-def findTeepSegments(groundReactionPath, liftOffFrames, impactFrames, footDownFrames):
+def findTeepSegments(segmentBeginnframe, groundReactionPath, liftOffFrames, impactFrames, footDownFrames):
     """
     Build segment data from manually-provided frame numbers.
     
@@ -50,10 +50,10 @@ def findTeepSegments(groundReactionPath, liftOffFrames, impactFrames, footDownFr
         # Phase 3: footDownFrame to trialEndFrame
         segmentData.append([
             0,
-            liftOffFrames[counter],
-            impactFrames[counter],
-            footDownFrames[counter],
-            len(data) - 1  # trial end is last frame in data
+            liftOffFrames[counter]-segmentBeginnframe[counter],
+            impactFrames[counter]-segmentBeginnframe[counter],
+            footDownFrames[counter]-segmentBeginnframe[counter],
+            footDownFrames[counter]+50  - segmentBeginnframe[counter]  # trial end is 50 frames after foot down
         ])
         counter += 1
     

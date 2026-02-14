@@ -4,15 +4,15 @@ import Scaler
 import Averager
 import matplotlib.pyplot as plt
 
-trialPath ="/N4/roundhouse"
+trialPath ="/E1/roundhouse"
 dataPath = "Raw_Data" + trialPath
 SlicedResultsPath = "processed_Data/" +trialPath + "/sliced"
 scaledResultPath = "processed_Data/" + trialPath + "/scaled"
 
 # Frame numbers for each segment phase boundary
-segmentLiftFrames = [415,754,1038,1322,1608,1892,2230,2520,2799,3300]
-segmentImpactFrames = [458,795,1080,1366,1649,1935,2277,2563,2842,3345]
-segmentFootDownFrames = [504,845,1136,1424,1712,2005,2332,2621,2943,3400]
+segmentLiftFrames = [519,989,1245,1563,1855,2335,2621,2937,3230,3507]
+segmentImpactFrames = [560,1024,1280,1595,1887,2369,2656,1969,3262,3540]
+segmentFootDownFrames = [760,1104,1372,1667,1959,2453,2762,3038,3331,3617]
 
 segmentBeginFrame = Slicer.calcBeginnframe(segmentLiftFrames)
 
@@ -21,6 +21,7 @@ for file in os.listdir(dataPath):
 
 grfPath = os.path.join(SlicedResultsPath + "/CoG_Velocity")
 Segments = Slicer.findTeepSegments(
+    segmentBeginFrame,
     grfPath,
     segmentLiftFrames,
     segmentImpactFrames,

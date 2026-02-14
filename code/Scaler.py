@@ -33,8 +33,6 @@ def calculateAverageSegementRatios(segments):
 
     # average each column (axis=0)
     avg = arr.mean(axis=0)
-
-    print(avg)
         
     return avg
 
@@ -65,44 +63,58 @@ def spline_interpolate_df(df, new_length, k=3):
     
     return pd.DataFrame(out, columns=df.columns)
 
-def scaleToFourPhases(dict,segments,scaledResultPath,directory):
-    framesToScaleTo = 480  # 4 phases of 120 frames each
-    internalFolder = os.path.join(scaledResultPath,directory)
+def scaleToFourPhases(dict, segments, scaledResultPath, directory):
+    """
+    Scale each phase independently to fixed length (0.25 * framesToScaleTo) using spline interpolation.
+    
+    """
+    framesToScaleTo = 200  
+    phase_frame_length = int(framesToScaleTo * 0.25)  # 120 frames per phase
+    internalFolder = os.path.join(scaledResultPath, directory)
     os.makedirs(internalFolder)
 
     def _safe_spline(segment_df, out_len):
+        """Safely interpolate a segment using spline."""
         if out_len <= 0:
             return pd.DataFrame(columns=segment_df.columns)
         n = len(segment_df)
         if n == 0:
-            return pd.DataFrame(np.nan, index=range(out_len), columns=segment_df.columns)
+            return pd.DataFrame(columns=segment_df.columns)
         if n == 1:
             row = segment_df.iloc[0].values
             arr = np.tile(row, (out_len, 1))
             return pd.DataFrame(arr, columns=segment_df.columns)
-        return spline_interpolate_df(segment_df, out_len)
+        # Use adaptive spline order
+        k = min(3, n - 1)
+        return spline_interpolate_df(segment_df, out_len, k=k)
 
     for i in range(len(dict)):
-        dataToScale = dict[i].drop(dict[i].columns[0], axis=1)
-
-        # fixed phase proportions: 0-0.25, 0.25-0.5, 0.5-0.75, 0.75-1
-        base_len = int(framesToScaleTo * 0.25)
-        segment_lengths = [base_len, base_len, base_len, base_len]
-        # adjust last segment to ensure total equals framesToScaleTo
-        segment_lengths[-1] += framesToScaleTo - sum(segment_lengths)
-
-        # extract segments using provided indices in `segments`
-        p1_df = dataToScale.iloc[0:segments[i][1]]
-        p2_df = dataToScale.iloc[segments[i][1]:segments[i][2]]
-        p3_df = dataToScale.iloc[segments[i][2]:segments[i][3]]
-        p4_df = dataToScale.iloc[segments[i][3]:segments[i][4]]
-
-        p1_scaled = _safe_spline(p1_df, segment_lengths[0])
-        p2_scaled = _safe_spline(p2_df, segment_lengths[1])
-        p3_scaled = _safe_spline(p3_df, segment_lengths[2])
-        p4_scaled = _safe_spline(p4_df, segment_lengths[3])
-
+        # Get the raw data (excluding index column)
+        raw_data = dict[i].drop(dict[i].columns[0], axis=1)
+        
+        # Get segment boundaries from the segments data
+        seg = segments[i]  # [0, lift_off_frame, impact_frame, foot_down_frame, total_frames]
+        
+        # Extract each phase
+        p1_df = raw_data.iloc[seg[0]:seg[1]]
+        p2_df = raw_data.iloc[seg[1]:seg[2]]
+        p3_df = raw_data.iloc[seg[2]:seg[3]]
+        p4_df = raw_data.iloc[seg[3]:seg[4]]
+        
+        # Scale each phase to fixed length
+        p1_scaled = _safe_spline(p1_df, phase_frame_length)
+        p2_scaled = _safe_spline(p2_df, phase_frame_length)
+        p3_scaled = _safe_spline(p3_df, phase_frame_length)
+        p4_scaled = _safe_spline(p4_df, phase_frame_length)
+        
+        # Concatenate all phases
         finalScaledData = pd.concat([p1_scaled, p2_scaled, p3_scaled, p4_scaled], ignore_index=True)
+        
+        # Save the scaled data
         tempname = "scaled" + str(i) + ".csv"
-        open(os.path.join(internalFolder, tempname), "x")
-        finalScaledData.to_csv(os.path.join(internalFolder, tempname), sep=",", index=False)
+        filepath = os.path.join(internalFolder, tempname)
+        open(filepath, "x")
+        finalScaledData.to_csv(filepath, sep=",", index=False)
+
+
+
