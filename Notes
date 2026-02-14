@@ -1,54 +1,45 @@
- Open Questions:
-Is there a way to mathematically describe covering UP?
-Is there  a way for theia to get me contact relations/times?
-Is there a nice way to modell weight transfer?
-How do i understand total body angular momentum?
+TODO:
+ Reprocess data
+ michaels code
+ AMAC Amoc plots
+ 
 
 
-Interesting variables to analyze:
+Left elbow:  
+   Total duration <- report as table
+   elbow speed at impact velocity overall  <- plot it first, if nothing fruitful, exclude
+   shoulder trajectory
+   pelvis rotation  <- about Z axis
+   Fz trajectories
+   COM (ground projection) and COP trajectories
 
-  Left elbow:
-    Jans Stability Measure
-    elbow speed at impact velocity overall
-    elbow trajectory
-    pelvis rotation
-    Weight transfer
-    elbow angle at impact
-    (Speed of retraction not necessary -> unnatural usually clinch or further elbows)
-    (blocking with other hand)
-    
-Uppercut:
-    Jans Stability metric
-    Wrist Speed
-    distance from wrist to thorax
-    pelvis rotation
-    Weight transfer
-    (blocking with other hand)
+Uppercut:  
+   Total duration <- report as table
+   Wrist Speed  
+   distance from wrist to thorax <- wrist joint position and thorax position AP dir
+   pelvis rotation  <- about Z axis
+   Fz trajectories
+   COM (ground projection) and COP trajectories
+   Block behaviour
 
-  Teep:
-    Jans Stability metric
-    COM Movement
-    Pelvis movement( maybe hip joint centre) to the front teepin hip
-    Time Retraction after impact
-    discrepancy in start and landing position
-    Time spent in air before/after impact(phases)
-    ankle velocity
-    (block not so relevant)
-
-  Kick:
-    Jans Stability Measure
-Angular momentum full body and all bodyparts about each axis
-Rate of chnage of total angular momnetum with respect to full body com about each axis
-for all motions
-    Duration of kicking phases ( preparation, execution, impac, recovery)
-    knee angle at impact
-    angle of shin on impact
-    hip rotation
-    Ankle velocity at impact
-    COM movement
-    discrepancy in start and landing position
-    (blocking with non kicking side hand
-
+  Teep:  
+      Duration of kick phase (double support, single support, double support) <- report as table
+      Rate of chnage of total angular momnetum with respect to full body com about each axis 
+      AMAC
+      AMOC
+      COM Height trajectory
+      COM (ground projection) and COP trajectories
+      Pelvis movement( maybe hip joint centre) to the front teepin hip
+      Fz trajectories
+  Kick:  
+      AMAC
+      AMOC
+      Duration of kick phases ( preparation, execution, impac, recovery) <- report as table
+      Angular momentum full body and all bodyparts about each axis  
+      Rate of chnage of total angular momnetum with respect to full body com about each axis 
+      COM Height trajectory
+      COM (ground projection) and COP trajectories
+      Fz trajectories
 
 
 First recording session:
