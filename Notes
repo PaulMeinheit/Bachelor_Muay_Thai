@@ -1,0 +1,55 @@
+TODO:
+ Reprocess data
+ michaels code
+ AMAC Amoc plots
+ 
+
+
+Left elbow:  
+   Total duration <- report as table
+   elbow speed at impact velocity overall  <- plot it first, if nothing fruitful, exclude
+   shoulder trajectory
+   pelvis rotation  <- about Z axis
+   Fz trajectories
+   COM (ground projection) and COP trajectories
+
+Uppercut:  
+   Total duration <- report as table
+   Wrist Speed  
+   distance from wrist to thorax <- wrist joint position and thorax position AP dir
+   pelvis rotation  <- about Z axis
+   Fz trajectories
+   COM (ground projection) and COP trajectories
+   Block behaviour
+
+  Teep:  
+      Duration of kick phase (double support, single support, double support) <- report as table
+      Rate of chnage of total angular momnetum with respect to full body com about each axis 
+      AMAC
+      AMOC
+      COM Height trajectory
+      COM (ground projection) and COP trajectories
+      Pelvis movement( maybe hip joint centre) to the front teepin hip
+      Fz trajectories
+  Kick:  
+      AMAC
+      AMOC
+      Duration of kick phases ( preparation, execution, impac, recovery) <- report as table
+      Angular momentum full body and all bodyparts about each axis  
+      Rate of chnage of total angular momnetum with respect to full body com about each axis 
+      COM Height trajectory
+      COM (ground projection) and COP trajectories
+      Fz trajectories
+
+
+First recording session:
+all went well
+ducttape on forceplate
+10 repetitions for each movement 
+5 minute selfdirected warmup
+as many practice kicks as desired to get comfortable
+
+
+Potential Plots
+
+Angular Momentum (H) vs. Angular Momentum Rate (dH/dt)
