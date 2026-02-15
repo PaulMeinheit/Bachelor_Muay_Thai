@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-def sliceData(dataPath, outputPath, segemnt_frames):
+def sliceData(dataPath, outputPath, segmentBeginnframes):
 
     stem = Path(dataPath).stem
     
@@ -14,8 +14,8 @@ def sliceData(dataPath, outputPath, segemnt_frames):
     
     os.makedirs(internalFolder)
     ##slicing the data into the 10 respective trials
-    for  i in range(len(segemnt_frames)-2):
-        temp = data.iloc[segemnt_frames[i]:segemnt_frames[i+1]]
+    for  i in range(len(segmentBeginnframes)-1):
+        temp = data.iloc[segmentBeginnframes[i]:segmentBeginnframes[i+1]]
         tempname ="sliced" + str(i) + ".csv"
         open(os.path.join(internalFolder, tempname), "x")
         temp.to_csv(os.path.join(internalFolder, tempname), sep=",", index = False)
