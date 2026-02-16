@@ -17,5 +17,12 @@ def load_csvs_from_dir(input_dir):
     for filename in sorted(os.listdir(input_dir)):
         if filename.endswith('.csv'):
             filepath = os.path.join(input_dir, filename)
-            data_dict[filename] = loadData(filepath)
+            # Try comma-separated first (sliced files), fall back to tab-separated (raw files)
+            try:
+                data_dict[filename] = pandas.read_csv(filepath_or_buffer=filepath, sep=',', header=[0, 1])
+            except Exception:
+                try:
+                    data_dict[filename] = loadData(filepath)
+                except Exception as e:
+                    print(f"Warning: could not load {filename}: {e}")
     return data_dict

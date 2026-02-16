@@ -5,16 +5,15 @@ import Averager
 import Dataloader
 import matplotlib.pyplot as plt
 
-trialPath ="/E1/teep"
+trialPath ="/N2/roundhouse"
 dataPath = "Raw_Data" + trialPath
 SlicedResultsPath = "processed_Data/" +trialPath + "/sliced"
 scaledResultPath = "processed_Data/" + trialPath + "/scaled"
 
 # Frame numbers for each segment phase boundary
-segmentLiftFrames = [456,1082,1458,1870,2328,2723,3136,3578,4025,4469,4896]
-segmentImpactFrames = [545,1133,1507,1912,2377,2769,3182,3628,4071,4515,4940]
-segmentFootDownFrames = [610,1176,1553,1956,2424,2815,3229,3674,4119,4569,5011]
-
+segmentLiftFrames = [259,541,871,1130,1412,1751,2065,2431,2718,2972]
+segmentImpactFrames = [295,575,905,1165,1445,1789,2098,2469,2753,3009]
+segmentFootDownFrames = [395,770,1070,1200,1550,1872,2185,2566,2845,3100]
 
 segmentBeginFrame = Slicer.calcBeginnframe(segmentLiftFrames)
 

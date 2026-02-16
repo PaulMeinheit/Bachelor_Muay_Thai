@@ -6,8 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D  # needed for 3D plots
 import os
 import numpy as np
 
-data = Dataloader.loadDataNoSkip("processed_Data/N1/roundhouse/sliced/CoG_Position/sliced6.csv")
-dataToPlot = data["FullBody_CoG_pos"]
+data = Dataloader.loadDataNoSkip("processed_Data/N1/roundhouse/scaled/CoG_Position/scaled5")
+dataToPlot = data["R_Foot_CoG_pos"]
 
 # Extract X, Y, Z values
 x_values = dataToPlot.iloc[:, 0]
@@ -60,7 +60,7 @@ plt.tight_layout()
 
 """# Save the plot to the plots folder
 plots_dir = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/plots"
-plot_filename = os.path.join(plots_dir, "FullBody_CoG_trajectory_N1s6.png")
+plot_filename = os.path.join(plots_dir, "rightfootN1s6scaled.png")
 print(f"Attempting to save to: {os.path.abspath(plot_filename)}", flush=True)
 print(f"Directory exists: {os.path.exists(plots_dir)}", flush=True)
 try:
