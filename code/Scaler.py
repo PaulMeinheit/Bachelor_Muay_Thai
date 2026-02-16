@@ -1,120 +1,63 @@
-"""Scaler helpers
-
-This file contains utilities to resample and scale time-series data.
-"""
-
-from typing import Dict, List, Optional, Union
+import Dataloader
 import os
 import pandas as pd
 import numpy as np
-from scipy.interpolate import splrep, splev
 
-def load_csvs_from_dir(directoryPath):
-    dataframes = []
-    for file in sorted(os.listdir(directoryPath)):
+def scaleDirectoryToFourPhases(input_dir, segments, output_dir, output_subdir):
+    data = Dataloader.load_csvs_from_dir(input_dir)
+    scaleToFourPhases(data, segments, output_dir, output_subdir)
     
-       data = pd.read_csv(os.path.join(directoryPath,file),header=[0, 1])
-       dataframes.append(data)
+def scaleToFourPhases(data, segments, output_dir, output_subdir):
+    for filename, df in data.items():
+        scaled_df = scaleDataFrameToFourPhases(df, segments)
+        output_path = os.path.join(output_dir, output_subdir)
+        os.makedirs(output_path, exist_ok=True)
+        scaled_df.to_csv(os.path.join(output_path, filename), index=False)
 
-    return dataframes
-def calculateAverageSegementRatios(segments):
-    ratios = []
-    for segment in segments:
-        total_frames = segment[4]
-        phase_ratios = [
-            segment[1] / total_frames,
-            segment[2] / total_frames,
-            segment[3] / total_frames,
-            1
-        ]
-        ratios.append(phase_ratios)
+def scaleDataFrameToFourPhases(df, segments):
+    # segments is a list of [phase0_start, phase0_end, phase1_end, phase2_end, phase3_end]
+    # We resample each phase to a fixed number of frames (25 each -> 100 total)
+    num_frames_per_phase = 25
+    scaled_phases = []
     
-    arr = np.array(ratios)
-
-    # average each column (axis=0)
-    avg = arr.mean(axis=0)
+    for seg in segments:
+        phase0 = df.iloc[seg[0]:seg[1]]
+        phase1 = df.iloc[seg[1]:seg[2]]
+        phase2 = df.iloc[seg[2]:seg[3]]
+        phase3 = df.iloc[seg[3]:seg[4]]
         
-    return avg
-
-
-
-def spline_interpolate_df(df, new_length, k=3):
-    """
-    Spline-interpolates each column of a DataFrame to a new number of rows.
-    
-    df: original DataFrame
-    new_length: number of rows desired in output
-    k: spline order (default cubic = 3)
-    """
-    
-    # original x-values (index positions 0 ... N-1)
-    x = np.arange(len(df))
-    
-    # new x-values to interpolate onto
-    x_new = np.linspace(0, len(df) - 1, new_length)
-    
-    out = {}
-    for col in df.columns:
-        y = df[col].values
+        scaled_phase0 = resamplePhase(phase0, num_frames_per_phase)
+        scaled_phase1 = resamplePhase(phase1, num_frames_per_phase)
+        scaled_phase2 = resamplePhase(phase2, num_frames_per_phase)
+        scaled_phase3 = resamplePhase(phase3, num_frames_per_phase)
         
-        # build spline and evaluate it
-        tck = splrep(x, y, k=k)
-        out[col] = splev(x_new, tck)
+        scaled_phases.append(scaled_phase0)
+        scaled_phases.append(scaled_phase1)
+        scaled_phases.append(scaled_phase2)
+        scaled_phases.append(scaled_phase3)
     
-    return pd.DataFrame(out, columns=df.columns)
+    return pd.concat(scaled_phases, ignore_index=True)
 
-def scaleToFourPhases(dict, segments, scaledResultPath, directory):
-    """
-    Scale each phase independently to fixed length (0.25 * framesToScaleTo) using spline interpolation.
-    
-    """
-    framesToScaleTo = 200  
-    phase_frame_length = int(framesToScaleTo * 0.25)  # 120 frames per phase
-    internalFolder = os.path.join(scaledResultPath, directory)
-    os.makedirs(internalFolder)
+def resamplePhase(phase_df, num_frames):
+    # Resample the phase dataframe to num_frames using interpolation
+    if len(phase_df) == 0:
+        print("empty phase encountered during resampling")
+        return pd.DataFrame()  # return empty if no data in phase
+        # return a dataframe with the same columns filled with NaN, repeated num_frames times
 
-    def _safe_spline(segment_df, out_len):
-        """Safely interpolate a segment using spline."""
-        if out_len <= 0:
-            return pd.DataFrame(columns=segment_df.columns)
-        n = len(segment_df)
-        if n == 0:
-            return pd.DataFrame(columns=segment_df.columns)
-        if n == 1:
-            row = segment_df.iloc[0].values
-            arr = np.tile(row, (out_len, 1))
-            return pd.DataFrame(arr, columns=segment_df.columns)
-        # Use adaptive spline order
-        k = min(3, n - 1)
-        return spline_interpolate_df(segment_df, out_len, k=k)
+    # All columns are numeric in your dataset; interpolate each to num_frames
+    cols = phase_df.columns.tolist()
+    orig_n = len(phase_df)
 
-    for i in range(len(dict)):
-        # Get the raw data (excluding index column)
-        raw_data = dict[i].drop(dict[i].columns[0], axis=1)
-        
-        # Get segment boundaries from the segments data
-        seg = segments[i]  # [0, lift_off_frame, impact_frame, foot_down_frame, total_frames]
-        
-        # Extract each phase
-        p1_df = raw_data.iloc[seg[0]:seg[1]]
-        p2_df = raw_data.iloc[seg[1]:seg[2]]
-        p3_df = raw_data.iloc[seg[2]:seg[3]]
-        p4_df = raw_data.iloc[seg[3]:seg[4]]
-        
-        # Scale each phase to fixed length
-        p1_scaled = _safe_spline(p1_df, phase_frame_length)
-        p2_scaled = _safe_spline(p2_df, phase_frame_length)
-        p3_scaled = _safe_spline(p3_df, phase_frame_length)
-        p4_scaled = _safe_spline(p4_df, phase_frame_length)
-        
-        # Concatenate all phases
-        finalScaledData = pd.concat([p1_scaled, p2_scaled, p3_scaled, p4_scaled], ignore_index=True)
-        
-        # Save the scaled data
-        tempname = "scaled" + str(i) + ".csv"
-        filepath = os.path.join(internalFolder, tempname)
-        open(filepath, "x")
-        finalScaledData.to_csv(filepath, sep=",", index=False)
+    # positions for original and target
+    x_orig = np.linspace(0, orig_n - 1, orig_n)
+    x_new = np.linspace(0, orig_n - 1, num_frames)
 
+    out_dict = {}
+    for c in cols:
+        y = phase_df[c].to_numpy(dtype=float)
+        y_new = np.interp(x_new, x_orig, y)
+        out_dict[c] = y_new
 
-
+    out_df = pd.DataFrame(out_dict, columns=cols)
+    return out_df.reset_index(drop=True)

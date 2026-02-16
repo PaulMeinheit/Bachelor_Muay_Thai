@@ -1,3 +1,4 @@
+import os
 import pandas
 import matplotlib
 import matplotlib.pyplot as plt
@@ -9,3 +10,12 @@ def loadData(filepath):
 def loadDataNoSkip(filepath):
     loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0,1])
     return loadedData
+    
+
+def load_csvs_from_dir(input_dir):
+    data_dict = {}
+    for filename in sorted(os.listdir(input_dir)):
+        if filename.endswith('.csv'):
+            filepath = os.path.join(input_dir, filename)
+            data_dict[filename] = loadData(filepath)
+    return data_dict
