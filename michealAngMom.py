@@ -1,6 +1,5 @@
 """
 Compute AMAC/AMOC (AMDP/AMOP) from *_AngMom_Segment_BodyCOM.csv exports.
-
 Overview
 --------
 This script reads segment and full-body angular momentum vectors (about Body COM) from
