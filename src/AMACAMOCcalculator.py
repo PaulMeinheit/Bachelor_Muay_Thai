@@ -116,6 +116,47 @@ def calculateAMACVectors():
             newAMACVectors.to_csv(out_path, index=False, header=True)
 
 def main():
-    calculateAMACVectors()  
+    calculateAMOCVectors()  
 
+def calculateAMOCVectors():
+    for subject in subjects:
+        for movement in movements:
+            if subject == "E2" and movement == "roundhouse":
+                continue
+            rawDataPath = "newAngMom/" + subject + "/" + movement + ".csv"
+            loadedAngMomData = pandas.read_csv(rawDataPath)
+            full_body_angmom_x = loadedAngMomData["('FullBody_AngMom', 'X')"]
+            full_body_angmom_y = loadedAngMomData["('FullBody_AngMom', 'Y')"]
+            full_body_angmom_z = loadedAngMomData["('FullBody_AngMom', 'Z')"]  
+
+            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACVector/{subject}/{movement}.csv"
+            loadedAMACData = pandas.read_csv(rawAMACpath)
+
+            newAMOCVectors = pandas.DataFrame()
+            
+            for bodypart in bodyparts:
+                if bodypart == "FullBody_AngMom":
+                    continue
+                
+                col = (bodypart + "AMOCV")
+                AMAC_x = []
+                AMAC_y = []
+                AMAC_z = []
+
+                for time in range(len(loadedAngMomData)):
+                    AMOCVectorX = full_body_angmom_x.iloc[time] - loadedAMACData[bodypart + "AMACVX"].iloc[time]
+                    AMOCVectorY = full_body_angmom_y.iloc[time] - loadedAMACData[bodypart + "AMACVY"].iloc[time]
+                    AMOCVectorZ = full_body_angmom_z.iloc[time] - loadedAMACData[bodypart + "AMACVZ"].iloc[time]
+                    AMAC_x.append(AMOCVectorX)
+                    AMAC_y.append(AMOCVectorY)
+                    AMAC_z.append(AMOCVectorZ)
+                newAMOCVectors[col + "X"] = AMAC_x
+                newAMOCVectors[col + "Y"] = AMAC_y
+                newAMOCVectors[col + "Z"] = AMAC_z
+
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/test/AMOCVector/{subject}"
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, f"{movement}.csv")
+            newAMOCVectors.to_csv(out_path, index=False, header=True)
+            print(f"Saved AMOC vectors for {subject} {movement} to {out_path}")
 main()
