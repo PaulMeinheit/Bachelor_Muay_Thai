@@ -115,9 +115,36 @@ def calculateAMACVectors():
             out_path = os.path.join(out_dir, f"{movement}.csv")
             newAMACVectors.to_csv(out_path, index=False, header=True)
 
-def main():
-    calculateAMOCVectors()  
 
+def calculateScalarAMOC():
+
+    for subject in subjects:
+        for movement in movements:
+            if subject == "E2" and movement == "roundhouse":
+                continue
+
+            rawAMOCpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCVector/{subject}/{movement}.csv"
+            loadedAMOCData = pandas.read_csv(rawAMOCpath)
+
+            newScalarAMOC = pandas.DataFrame()
+            for bodypart in bodyparts:
+                if bodypart == "FullBody_AngMom":
+                    continue
+                col = (bodypart + "AMOC")
+                scalarAMOCBodyPart = []
+                for time in range(len(loadedAMOCData)):
+                    amoc_x = loadedAMOCData[bodypart + "AMOCVX"].iloc[time]
+                    amoc_y = loadedAMOCData[bodypart + "AMOCVY"].iloc[time]
+                    amoc_z = loadedAMOCData[bodypart + "AMOCVZ"].iloc[time]
+                    AMOCVector = np.array([amoc_x, amoc_y, amoc_z])
+                    scalarAMOCBodyPart.append(np.linalg.norm(AMOCVector))
+                newScalarAMOC[col] = scalarAMOCBodyPart
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCscalar/{subject}"
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, f"{movement}.csv")
+            newScalarAMOC.to_csv(out_path, index=False, header=True)
+
+            
 def calculateAMOCVectors():
     for subject in subjects:
         for movement in movements:
@@ -154,9 +181,49 @@ def calculateAMOCVectors():
                 newAMOCVectors[col + "Y"] = AMAC_y
                 newAMOCVectors[col + "Z"] = AMAC_z
 
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/test/AMOCVector/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCVector/{subject}"
             os.makedirs(out_dir, exist_ok=True)
             out_path = os.path.join(out_dir, f"{movement}.csv")
             newAMOCVectors.to_csv(out_path, index=False, header=True)
             print(f"Saved AMOC vectors for {subject} {movement} to {out_path}")
+def calculateTheta(): 
+    
+    for subject in subjects:
+        for movement in movements:
+            if subject == "E2" and movement == "roundhouse":
+                continue
+            rawAMOCpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACVector/{subject}/{movement}.csv"
+            loadedAMACData = pandas.read_csv(rawAMOCpath)
+
+            rawDataPath = "newAngMom/" + subject + "/" + movement + ".csv"
+            loadedAngMomData = pandas.read_csv(rawDataPath)
+            
+            newThetaData = pandas.DataFrame()
+            for bodypart in bodyparts:
+                if bodypart == "FullBody_AngMom":
+                    continue
+                col = (bodypart + "Theta")
+                thetaBodyPart = []
+                for time in range(len(loadedAMACData)):
+                    amac_x = loadedAMACData[bodypart + "AMACVX"].iloc[time]
+                    amac_y = loadedAMACData[bodypart + "AMACVY"].iloc[time]
+                    amac_z = loadedAMACData[bodypart + "AMACVZ"].iloc[time]
+                    AMACVector = np.array([amac_x, amac_y, amac_z])
+                    bodypartAngMomX = loadedAngMomData["('" + bodypart + "', 'X')"].iloc[time]
+                    bodypartAngMomY = loadedAngMomData["('" + bodypart + "', 'Y')"].iloc[time]
+                    bodypartAngMomZ = loadedAngMomData["('" + bodypart + "', 'Z')"].iloc[time]
+                    bodypartVector = np.array([bodypartAngMomX, bodypartAngMomY, bodypartAngMomZ])
+                    inside = np.vdot(AMACVector, bodypartVector) / (np.linalg.norm(AMACVector) * np.linalg.norm(bodypartVector))
+                    theta = np.arccos(inside)
+    
+                    thetaBodyPart.append(theta)
+
+                newThetaData[col] = thetaBodyPart
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/Theta/{subject}"
+            os.makedirs(out_dir, exist_ok=True)
+            out_path = os.path.join(out_dir, f"{movement}.csv")
+            newThetaData.to_csv(out_path, index=False, header=True)
+
+def main():
+    calculateTheta()
 main()
