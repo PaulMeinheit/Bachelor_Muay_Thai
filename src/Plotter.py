@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D  # needed for 3D plots
 import os
 import numpy as np
 
-data = Dataloader.loadDataNoSkip("processed_Data/E1/roundhouse/scaled/CoG_Position/scaled2")
+data = Dataloader.loadDataNoSkip("processed_visual3dData/N3/roundhouse/scaled/CoG_Position/scaled5")
 dataToPlot = data["R_Foot_CoG_pos"]
 
 # Extract X, Y, Z values

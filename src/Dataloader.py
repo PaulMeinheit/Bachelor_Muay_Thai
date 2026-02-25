@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 def loadData(filepath):
-    loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep='\t', skiprows= lambda x: x in [0, 2, 3], header= [0,1])
+    loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0])
     return loadedData
 
 def loadDataNoSkip(filepath):
@@ -19,7 +19,7 @@ def load_csvs_from_dir(input_dir):
             filepath = os.path.join(input_dir, filename)
             # Try comma-separated first (sliced files), fall back to tab-separated (raw files)
             try:
-                data_dict[filename] = pandas.read_csv(filepath_or_buffer=filepath, sep=',', header=[0, 1])
+                data_dict[filename] = pandas.read_csv(filepath_or_buffer=filepath, sep=',', header=[0])
             except Exception:
                 try:
                     data_dict[filename] = loadData(filepath)

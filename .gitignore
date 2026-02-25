@@ -2,9 +2,9 @@
 __pycache__/
 *.py[codz]
 *$py.class
-
 *.csv
-processed_Data/
+processed_visual3dData/
+processed_AngMomData/
 # C extensions
 *.so
 slicedResults/

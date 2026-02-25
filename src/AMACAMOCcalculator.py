@@ -58,9 +58,9 @@ def calculate_AMAC():
                 newAMACData[col] = scalarAMACBodyPart   
             
         
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACscalar/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
-            out_path = os.path.join(out_dir, f"{movement}.csv")
+            out_path = os.path.join(out_dir, f"AMACscalar.csv")
             newAMACData.to_csv(out_path, index=False, header=True)
                         
                     
@@ -71,7 +71,7 @@ def calculateAMACVectors():
             if subject == "E2" and movement == "roundhouse":
                 continue
             rawDataPath = "newAngMom/" + subject + "/" + movement + ".csv"
-            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACscalar/{subject}/{movement}.csv"
+            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}/AMACscalar.csv"
             loadedAngMomData = pandas.read_csv(rawDataPath)
             loadedAMACData = pandas.read_csv(rawAMACpath)
 
@@ -110,9 +110,9 @@ def calculateAMACVectors():
                         elif axis == 'Z':
                             newAMACVectors[col] = AMAC_z
 
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACVector/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
-            out_path = os.path.join(out_dir, f"{movement}.csv")
+            out_path = os.path.join(out_dir, f"AMACVector.csv")
             newAMACVectors.to_csv(out_path, index=False, header=True)
 
 
@@ -123,7 +123,7 @@ def calculateScalarAMOC():
             if subject == "E2" and movement == "roundhouse":
                 continue
 
-            rawAMOCpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCVector/{subject}/{movement}.csv"
+            rawAMOCpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}/AMOCVector.csv"
             loadedAMOCData = pandas.read_csv(rawAMOCpath)
 
             newScalarAMOC = pandas.DataFrame()
@@ -139,9 +139,9 @@ def calculateScalarAMOC():
                     AMOCVector = np.array([amoc_x, amoc_y, amoc_z])
                     scalarAMOCBodyPart.append(np.linalg.norm(AMOCVector))
                 newScalarAMOC[col] = scalarAMOCBodyPart
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCscalar/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
-            out_path = os.path.join(out_dir, f"{movement}.csv")
+            out_path = os.path.join(out_dir, f"AMOCscalar.csv")
             newScalarAMOC.to_csv(out_path, index=False, header=True)
 
             
@@ -156,7 +156,7 @@ def calculateAMOCVectors():
             full_body_angmom_y = loadedAngMomData["('FullBody_AngMom', 'Y')"]
             full_body_angmom_z = loadedAngMomData["('FullBody_AngMom', 'Z')"]  
 
-            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACVector/{subject}/{movement}.csv"
+            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}/AMACVector.csv"
             loadedAMACData = pandas.read_csv(rawAMACpath)
 
             newAMOCVectors = pandas.DataFrame()
@@ -181,19 +181,19 @@ def calculateAMOCVectors():
                 newAMOCVectors[col + "Y"] = AMAC_y
                 newAMOCVectors[col + "Z"] = AMAC_z
 
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMOCVector/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
-            out_path = os.path.join(out_dir, f"{movement}.csv")
+            out_path = os.path.join(out_dir, f"AMOCVector.csv")
             newAMOCVectors.to_csv(out_path, index=False, header=True)
-            print(f"Saved AMOC vectors for {subject} {movement} to {out_path}")
+            
 def calculateTheta(): 
     
     for subject in subjects:
         for movement in movements:
             if subject == "E2" and movement == "roundhouse":
                 continue
-            rawAMOCpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/AMACVector/{subject}/{movement}.csv"
-            loadedAMACData = pandas.read_csv(rawAMOCpath)
+            rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}/AMACVector.csv"
+            loadedAMACData = pandas.read_csv(rawAMACpath)
 
             rawDataPath = "newAngMom/" + subject + "/" + movement + ".csv"
             loadedAngMomData = pandas.read_csv(rawDataPath)
@@ -219,11 +219,20 @@ def calculateTheta():
                     thetaBodyPart.append(theta)
 
                 newThetaData[col] = thetaBodyPart
-            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/Theta/{subject}"
+            out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
-            out_path = os.path.join(out_dir, f"{movement}.csv")
+            out_path = os.path.join(out_dir, f"theta.csv")
             newThetaData.to_csv(out_path, index=False, header=True)
 
 def main():
+    calculate_AMAC()
+    print("Finished calculating AMAC scalars.")
+    calculateAMACVectors()
+    print("Finished calculating AMAC vectors.")
+    calculateAMOCVectors()
+    print("Finished calculating AMOC vectors.")
+    calculateScalarAMOC()
+    print("Finished calculating AMOC scalars.")
     calculateTheta()
+    print("Finished calculating Theta.")
 main()
