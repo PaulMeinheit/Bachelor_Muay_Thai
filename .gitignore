@@ -3,6 +3,7 @@ __pycache__/
 *.py[codz]
 *$py.class
 *.csv
+Plots/
 processed_visual3dData/
 processed_AngMomData/
 # C extensions

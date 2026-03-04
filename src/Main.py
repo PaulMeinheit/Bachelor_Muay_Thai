@@ -43,11 +43,6 @@ data = {
     },
 
     "N1": {
-        "teep": {
-            "lift": [434,790,1174,1566,2368,2839,3250,3894,4304,4764],
-            "impact": [470,840,1209,1604,2413,2880,3291,3939,4344,4810],
-            "foot_down": [555,916,1292,1896,2478,2937,3368,4009,4400,4867],
-        },
         "roundhouse": {
             "lift": [519,989,1245,1563,1855,2335,2621,2937,3230,3507],
             "impact": [560,1024,1280,1595,1887,2369,2656,2969,3262,3540],
@@ -97,16 +92,34 @@ data = {
 
 subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
 movements = ["roundhouse", "teep"]
+subjectmovemntExclusions = {
+    ("E1", "teep") : [],
+    ("E1", "roundhouse") : [],
+    ("E2", "teep") : [],
+    ("E2", "roundhouse") : [],
+    ("E3", "teep") : [],
+    ("E3", "roundhouse") : [],
+    ("N1", "teep") : [4],
+    ("N1", "roundhouse") : [1],
+    ("N2", "teep") : [],
+    ("N2", "roundhouse") : [2,3,4,5],
+    ("N3", "teep") : [8],
+    ("N3", "roundhouse") : [1],
+    ("N4", "teep") : [],
+    ("N4", "roundhouse") : []
+}
 
 for subject in subjects:
         for movement in movements:
             if subject == "E2" and movement == "roundhouse":
                 continue
+            if subject == "N1" and movement == "teep":
+                continue
             
             trialPath ="/" + subject + "/" + movement
             dataPath = "calculatedAngMomStuff" + trialPath
-            SlicedResultsPath = "processed_AngMomData/" +trialPath + "/sliced"
-            scaledResultPath = "processed_AngMomData/" + trialPath + "/scaled"
+            SlicedResultsPath = "scaled_Data/processed_AngMomData/" +trialPath + "/sliced"
+            scaledResultPath = "scaled_Data/processed_AngMomData/" + trialPath + "/scaled"
 
             segmentLiftFrames = data[subject][movement]["lift"]
             segmentImpactFrames = data[subject][movement]["impact"]
@@ -133,8 +146,7 @@ for subject in subjects:
                 
                 print(directory)
                 Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
-                
-            #Averager.run(scaled_results_dir=scaledResultPath, output_dir="AveragedResults")
-
-
+            
+            for directory in sorted(os.listdir(scaledResultPath)):
+                Averager.average_scaled_files(os.path.join(scaledResultPath, directory), subjectmovemntExclusions[(subject, movement)])
 

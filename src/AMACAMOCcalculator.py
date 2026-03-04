@@ -95,9 +95,12 @@ def calculateAMACVectors():
                 AMAC_z = []
                     
                 for time in range(len(loadedAMACData)):
-                    AMAC_x.append(AMACBodyPart.iloc[time] * full_body_angmom_x.iloc[time])
-                    AMAC_y.append(AMACBodyPart.iloc[time] * full_body_angmom_y.iloc[time])
-                    AMAC_z.append(AMACBodyPart.iloc[time] * full_body_angmom_z.iloc[time])
+                    full_body_angmom_x_normalized = full_body_angmom_x.iloc[time] / np.linalg.norm([full_body_angmom_x.iloc[time], full_body_angmom_y.iloc[time], full_body_angmom_z.iloc[time]]) 
+                    full_body_angmom_y_normalized = full_body_angmom_y.iloc[time] / np.linalg.norm([full_body_angmom_x.iloc[time], full_body_angmom_y.iloc[time], full_body_angmom_z.iloc[time]]) 
+                    full_body_angmom_z_normalized = full_body_angmom_z.iloc[time] / np.linalg.norm([full_body_angmom_x.iloc[time], full_body_angmom_y.iloc[time], full_body_angmom_z.iloc[time]]) 
+                    AMAC_x.append(AMACBodyPart.iloc[time] * full_body_angmom_x_normalized)
+                    AMAC_y.append(AMACBodyPart.iloc[time] * full_body_angmom_y_normalized)
+                    AMAC_z.append(AMACBodyPart.iloc[time] * full_body_angmom_z_normalized)
 
                 for idx, axis in enumerate(['X', 'Y', 'Z']):
                         col = (bodypart + "AMACV" + axis)
@@ -152,9 +155,6 @@ def calculateAMOCVectors():
                 continue
             rawDataPath = "newAngMom/" + subject + "/" + movement + ".csv"
             loadedAngMomData = pandas.read_csv(rawDataPath)
-            full_body_angmom_x = loadedAngMomData["('FullBody_AngMom', 'X')"]
-            full_body_angmom_y = loadedAngMomData["('FullBody_AngMom', 'Y')"]
-            full_body_angmom_z = loadedAngMomData["('FullBody_AngMom', 'Z')"]  
 
             rawAMACpath = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}/AMACVector.csv"
             loadedAMACData = pandas.read_csv(rawAMACpath)
@@ -166,20 +166,26 @@ def calculateAMOCVectors():
                     continue
                 
                 col = (bodypart + "AMOCV")
-                AMAC_x = []
-                AMAC_y = []
-                AMAC_z = []
+                AMOC_x = []
+                AMOC_y = []
+                AMOC_z = []
 
                 for time in range(len(loadedAngMomData)):
-                    AMOCVectorX = full_body_angmom_x.iloc[time] - loadedAMACData[bodypart + "AMACVX"].iloc[time]
-                    AMOCVectorY = full_body_angmom_y.iloc[time] - loadedAMACData[bodypart + "AMACVY"].iloc[time]
-                    AMOCVectorZ = full_body_angmom_z.iloc[time] - loadedAMACData[bodypart + "AMACVZ"].iloc[time]
-                    AMAC_x.append(AMOCVectorX)
-                    AMAC_y.append(AMOCVectorY)
-                    AMAC_z.append(AMOCVectorZ)
-                newAMOCVectors[col + "X"] = AMAC_x
-                newAMOCVectors[col + "Y"] = AMAC_y
-                newAMOCVectors[col + "Z"] = AMAC_z
+                    
+
+                    angmomx = loadedAngMomData["('" + bodypart + "', 'X')"].iloc[time]
+                    angmomy = loadedAngMomData["('" + bodypart + "', 'Y')"].iloc[time]
+                    angmomz = loadedAngMomData["('" + bodypart + "', 'Z')"].iloc[time]
+
+                    AMOCVectorX = angmomx - loadedAMACData[bodypart + "AMACVX"].iloc[time]
+                    AMOCVectorY = angmomy - loadedAMACData[bodypart + "AMACVY"].iloc[time]
+                    AMOCVectorZ = angmomz - loadedAMACData[bodypart + "AMACVZ"].iloc[time]
+                    AMOC_x.append(AMOCVectorX)
+                    AMOC_y.append(AMOCVectorY)
+                    AMOC_z.append(AMOCVectorZ)
+                newAMOCVectors[col + "X"] = AMOC_x
+                newAMOCVectors[col + "Y"] = AMOC_y
+                newAMOCVectors[col + "Z"] = AMOC_z
 
             out_dir = f"/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/calculatedAngMomStuff/{subject}/{movement}"
             os.makedirs(out_dir, exist_ok=True)
