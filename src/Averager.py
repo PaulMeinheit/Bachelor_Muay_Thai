@@ -5,7 +5,7 @@ import numpy as np
 
 def average_scaled_files(directory, exclusions, output_file="averaged.csv"):
 	# Find all scaled*.csv files
-	files = [f for f in os.listdir(directory) if f.startswith("scaled") and f[-1] not in exclusions]
+	files = [f for f in os.listdir(directory) if f not in exclusions]
 	if not files:
 		raise ValueError("No scaled* files found in directory.")
 	# Read all files into DataFrames
@@ -28,4 +28,3 @@ def average_scaled_files(directory, exclusions, output_file="averaged.csv"):
 	# Write to output file in the same directory
 	avg_df.to_csv(os.path.join(directory, output_file), index=False)
 	print(f"Averaged file written to {os.path.join(directory, output_file)}")
-

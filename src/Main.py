@@ -1,10 +1,11 @@
+import Flattener
 import Slicer
 import os
 import Scaler
 import Averager
 import Dataloader
 import matplotlib.pyplot as plt
-
+import Centerer
 # Structured dataset: subject -> movement -> frame types
 
 data = {
@@ -118,9 +119,10 @@ for subject in subjects:
             
             trialPath ="/" + subject + "/" + movement
             dataPath = "calculatedAngMomStuff" + trialPath
-            SlicedResultsPath = "scaled_Data/processed_AngMomData/" +trialPath + "/sliced"
-            scaledResultPath = "scaled_Data/processed_AngMomData/" + trialPath + "/scaled"
-
+            SlicedResultsPath = "scaled_Data/processed_visual3dData/" +trialPath + "/sliced"
+            scaledResultPath = "scaled_Data/processed_visual3dData/" + trialPath + "/scaled"
+            flattenedResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/flattened"
+            centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
             segmentLiftFrames = data[subject][movement]["lift"]
             segmentImpactFrames = data[subject][movement]["impact"]
             segmentFootDownFrames = data[subject][movement]["foot_down"]
@@ -128,7 +130,7 @@ for subject in subjects:
             # Frame numbers for each segment phase boundary
             
             segmentBeginFrame = Slicer.calcBeginnframe(segmentLiftFrames)
-
+            """
             for file in os.listdir(dataPath):
                 Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrame)
 
@@ -146,7 +148,13 @@ for subject in subjects:
                 
                 print(directory)
                 Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
-            
+            """
             for directory in sorted(os.listdir(scaledResultPath)):
-                Averager.average_scaled_files(os.path.join(scaledResultPath, directory), subjectmovemntExclusions[(subject, movement)])
-
+                Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
+           
+            Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
+            Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
+            for directory in sorted(os.listdir(flattenedResultPath)):
+                Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
+               
+            
