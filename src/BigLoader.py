@@ -1,0 +1,57 @@
+import os
+from os import path
+
+import pandas as pd
+
+
+subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
+
+
+movements = ["roundhouse", "teep"]
+FailExclusions = {
+    ("E1", "teep") : ["averaged.csv"],
+    ("E1", "roundhouse") : ["averaged.csv"],
+    ("E2", "teep") : ["averaged.csv"],
+    ("E2", "roundhouse") : ["averaged.csv"],
+    ("E3", "teep") : ["averaged.csv"],
+    ("E3", "roundhouse") : ["averaged.csv"],
+    ("N1", "teep") : ["scaled4.csv","averaged.csv"],
+    ("N1", "roundhouse") : ["scaled1.csv","averaged.csv"],
+    ("N2", "teep") : ["averaged.csv"],
+    ("N2", "roundhouse") : ["scaled2.csv", "scaled3.csv", "scaled4.csv", "scaled5.csv", "averaged.csv"],
+    ("N3", "teep") : ["scaled8.csv","averaged.csv"],
+    ("N3", "roundhouse") : ["scaled1.csv","averaged.csv"],
+    ("N4", "teep") : ["averaged.csv"],
+    ("N4", "roundhouse") : ["averaged.csv"]
+}
+
+
+def loadallspecified(subjects, movement) -> pd.DataFrame:
+    BigData = pd.DataFrame()
+    subjectDataList = []
+    
+    for subject in subjects:
+        
+        subjectData = pd.DataFrame()
+        movement = "roundhouse"
+        if subject == "E2" and movement == "roundhouse":
+            continue
+        if subject == "N1" and movement == "teep":
+            continue
+        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/" + subject + "/"+ movement +"/centered/CoG_Position/"
+        files = [f for f in os.listdir(path) if f not in FailExclusions[(subject, movement)]]
+        if not files:
+	        raise ValueError("No scaled* files found in directory.")
+        dflist = []
+        keyList = []
+        for file in sorted(files):
+            i = 0
+            dflist.append(pd.read_csv(os.path.join(path, file)))
+            keyList.append(str(i))
+            i += 1
+        subjectData = pd.concat(dflist, axis=1, keys=keyList)
+        subjectDataList.append(subjectData)
+    BigData = pd.concat(subjectDataList, axis=1, keys=subjects)
+    print(BigData)
+    
+    return BigData   

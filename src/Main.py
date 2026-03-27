@@ -148,7 +148,7 @@ for subject in subjects:
                 
                 print(directory)
                 Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
-            """
+            
             for directory in sorted(os.listdir(scaledResultPath)):
                 Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
            
@@ -156,5 +156,5 @@ for subject in subjects:
             Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
             for directory in sorted(os.listdir(flattenedResultPath)):
                 Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
-               
+               """
             
