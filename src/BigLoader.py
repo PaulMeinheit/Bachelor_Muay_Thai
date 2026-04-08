@@ -38,7 +38,7 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
             continue
         if subject == "N1" and movement == "teep":
             continue
-        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/" + subject + "/"+ movement +"/centered/CoG_Position/"
+        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/"+subject+"/"+movement+"/centered/CoG_Position/"
         files = [f for f in os.listdir(path) if f not in FailExclusions[(subject, movement)]]
         if not files:
 	        raise ValueError("No scaled* files found in directory.")
@@ -52,6 +52,6 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
         subjectData = pd.concat(dflist, axis=1, keys=keyList)
         subjectDataList.append(subjectData)
     BigData = pd.concat(subjectDataList, axis=1, keys=subjects)
-    print(BigData)
+    
     
     return BigData   
