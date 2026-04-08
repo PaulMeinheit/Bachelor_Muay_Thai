@@ -11,19 +11,40 @@ movements = ["roundhouse", "teep"]
 FailExclusions = {
     ("E1", "teep") : ["averaged.csv"],
     ("E1", "roundhouse") : ["averaged.csv"],
+    ("E1", "elbow") : ["averaged.csv"],
+    ("E1", "uppercut") : ["averaged.csv"],
+
     ("E2", "teep") : ["averaged.csv"],
     ("E2", "roundhouse") : ["averaged.csv"],
+    ("E2", "elbow") : ["averaged.csv"],
+    ("E2", "uppercut") : ["averaged.csv"],
+
     ("E3", "teep") : ["averaged.csv"],
     ("E3", "roundhouse") : ["averaged.csv"],
+    ("E3", "elbow") : ["averaged.csv"],
+    ("E3", "uppercut") : ["averaged.csv"],
+
     ("N1", "teep") : ["scaled4.csv","averaged.csv"],
     ("N1", "roundhouse") : ["scaled1.csv","averaged.csv"],
+    ("N1", "elbow") : ["scaled4.csv","averaged.csv"],
+    ("N1", "uppercut") : ["scaled1.csv","averaged.csv"],
+
     ("N2", "teep") : ["averaged.csv"],
     ("N2", "roundhouse") : ["scaled2.csv", "scaled3.csv", "scaled4.csv", "scaled5.csv", "averaged.csv"],
+    ("N2", "elbow") : ["averaged.csv"],
+    ("N2", "uppercut") : ["scaled2.csv", "scaled3.csv", "scaled4.csv", "scaled5.csv", "averaged.csv"],
+
     ("N3", "teep") : ["scaled8.csv","averaged.csv"],
     ("N3", "roundhouse") : ["scaled1.csv","averaged.csv"],
+    ("N3", "elbow") : ["scaled8.csv","averaged.csv"],
+    ("N3", "uppercut") : ["scaled1.csv","averaged.csv"],
+
     ("N4", "teep") : ["averaged.csv"],
-    ("N4", "roundhouse") : ["averaged.csv"]
+    ("N4", "roundhouse") : ["averaged.csv"],
+    ("N4", "elbow") : ["averaged.csv"],
+    ("N4", "uppercut") : ["averaged.csv"],
 }
+
 
 
 def loadallspecified(subjects, movement) -> pd.DataFrame:
@@ -33,12 +54,12 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
     for subject in subjects:
         
         subjectData = pd.DataFrame()
-        movement = "roundhouse"
+        
         if subject == "E2" and movement == "roundhouse":
             continue
         if subject == "N1" and movement == "teep":
             continue
-        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/"+subject+"/"+movement+"/centered/CoG_Position/"
+        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/"+subject+"/"+movement+"/centered/JointPositions/"
         files = [f for f in os.listdir(path) if f not in FailExclusions[(subject, movement)]]
         if not files:
 	        raise ValueError("No scaled* files found in directory.")

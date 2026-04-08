@@ -37,8 +37,8 @@ from matplotlib.cm import ScalarMappable
 # CONFIGURATION  ← edit these
 # ──────────────────────────────────────────────────────────────────────────────
 
-X_VAR = "FullBody_CoG_pos_X"   # variable name for the fore-aft axis
-Y_VAR = "FullBody_CoG_pos_Y"   # variable name for the lateral axis
+X_VAR = "L_ELBOW_POSITION_X"   # variable name for the fore-aft axis
+Y_VAR = "L_ELBOW_POSITION_Y"   # variable name for the lateral axis
 
 # How many evenly-spaced frames at which to draw SD ellipses.
 N_ELLIPSES = 0
@@ -55,7 +55,7 @@ novices = ["N1", "N2", "N3", "N4"]
 # ──────────────────────────────────────────────────────────────────────────────
 
 def load_data() -> pd.DataFrame:
-    data = BigLoader.loadallspecified(novices, "roundhouse")
+    data = BigLoader.loadallspecified(experts, "elbow")
     data.columns.names = ["subject", "trial", "variable"]
     return data
 
@@ -151,7 +151,7 @@ def plot_com_projection(
 
     plt.tight_layout()
 
-    plt.savefig("/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Plots/CoMgroundProjection/FullBodyComNovices.png", dpi=300)
+    #plt.savefig("/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Plots/CoMgroundProjection/FullBodyComNovices.png", dpi=300)
 
     plt.show()
 

@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 def loadData(filepath):
     loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0])
     return loadedData
-
+def loadRawData(filepath):
+    loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep='\t', header= [1,4])
+    return loadedData
 def loadDataNoSkip(filepath):
     loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0,1])
     return loadedData
@@ -19,10 +21,10 @@ def load_csvs_from_dir(input_dir):
             filepath = os.path.join(input_dir, filename)
             # Try comma-separated first (sliced files), fall back to tab-separated (raw files)
             try:
-                data_dict[filename] = pandas.read_csv(filepath_or_buffer=filepath, sep=',', header=[0])
+                data_dict[filename] = pandas.read_csv(filepath_or_buffer=filepath, sep=',', header=[0,1])
             except Exception:
                 try:
-                    data_dict[filename] = loadData(filepath)
+                    data_dict[filename] = loadDataNoSkip(filepath)
                 except Exception as e:
                     print(f"Warning: could not load {filename}: {e}")
     return data_dict

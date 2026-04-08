@@ -148,7 +148,7 @@ data = {
 }
 
 subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
-movements = ["roundhouse", "teep"]
+movements = ["elbow", "uppercut"]
 subjectmovemntExclusions = {
     ("E1", "teep") : [],
     ("E1", "roundhouse") : [],
@@ -174,43 +174,49 @@ for subject in subjects:
                 continue
             
             trialPath ="/" + subject + "/" + movement
-            dataPath = "calculatedAngMomStuff" + trialPath
+            dataPath = "Raw_Data" + trialPath
             SlicedResultsPath = "scaled_Data/processed_visual3dData/" +trialPath + "/sliced"
             scaledResultPath = "scaled_Data/processed_visual3dData/" + trialPath + "/scaled"
             flattenedResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/flattened"
             centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
-            segmentLiftFrames = data[subject][movement]["lift"]
-            segmentImpactFrames = data[subject][movement]["impact"]
-            segmentFootDownFrames = data[subject][movement]["foot_down"]
-
+            #segmentLiftFrames = data[subject][movement]["lift"]
+            #segmentImpactFrames = data[subject][movement]["impact"]
+            #segmentFootDownFrames = data[subject][movement]["foot_down"]
+            
             # Frame numbers for each segment phase boundary
             
-            segmentBeginFrame = Slicer.calcBeginnframe(segmentLiftFrames)
-            """
+            segmentEndFrames = data[subject][movement]["end"]
+            segmentBeginFrames = data[subject][movement]["start"]
+
+            Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
+"""         
             for file in os.listdir(dataPath):
-                Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrame)
+                Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
 
-            grfPath = os.path.join(SlicedResultsPath + "/theta")
-            Segments = Slicer.findTeepSegments(
-                    segmentBeginFrame,
-                    grfPath,
-                    segmentLiftFrames,
-                    segmentImpactFrames,
-                    segmentFootDownFrames,
-
-                )
-
+            randomDataPath = os.path.join(SlicedResultsPath + "/CoG_Position")
+            #Segments = Slicer.findTeepSegments(
+            #        segmentBeginFrames,
+            #        grfPath,
+            #        segmentLiftFrames,
+            #        segmentImpactFrames,
+            #        segmentFootDownFrames,
+            #
+            #)    
+            Segments = Slicer.findElbowUpperSegments(
+                    segmentBeginFrames,
+                    segmentEndFrames,
+                    randomDataPath
+            )
             for directory in sorted(os.listdir(SlicedResultsPath)):
                 
                 print(directory)
-                Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
+                #Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
             
+                Scaler.scaleDirectoryBeginningToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
             for directory in sorted(os.listdir(scaledResultPath)):
                 Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
-           
-            Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
-            Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
-            for directory in sorted(os.listdir(flattenedResultPath)):
-                Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
-               """
-            
+           """
+            #Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
+            #for directory in sorted(os.listdir(flattenedResultPath)):
+                #Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
+             

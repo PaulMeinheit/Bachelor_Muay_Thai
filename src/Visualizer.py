@@ -80,7 +80,7 @@ _C = {
 # ──────────────────────────────────────────────────────────────────────────────
  
 def load_group(subjects) -> pd.DataFrame:
-    data = BigLoader.loadallspecified(subjects, "teep")
+    data = BigLoader.loadallspecified(subjects, "elbow")
     data.columns.names = ["subject", "trial", "variable"]
     return data
  
@@ -325,18 +325,12 @@ AMOvariables = [
 # ──────────────────────────────────────────────────────────────────────────────
  
 if __name__ == "__main__":
-    for variable in AMOvariables:
-        plot_mean_sd_comparison(
-            variable    = variable,
+    
+    plot_mean_sd_comparison(
+            variable    = "L_ELBOW_POSITION_X",
             shade_alpha = SHADE_ALPHA,
             fade_edges  = FADE_EDGES,
             fig_size    = FIG_SIZE,
         )
-    plot_mean_sd(
-        variable    = VARIABLE,
-        shade_alpha = SHADE_ALPHA,
-        fade_edges  = FADE_EDGES,
-        fig_size    = FIG_SIZE,
-        group       = experts,
-    )
+   
  
