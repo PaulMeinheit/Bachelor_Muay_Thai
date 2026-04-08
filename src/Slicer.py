@@ -25,7 +25,7 @@ def sliceData(dataPath, outputPath, segmentBeginnframes):
 
     stem = Path(dataPath).stem
     
-    data = Dataloader.loadRawData(dataPath)
+    data = Dataloader.loadData(dataPath)
     internalFolder = os.path.join(outputPath,stem)
 
     

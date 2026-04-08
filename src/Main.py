@@ -174,11 +174,11 @@ for subject in subjects:
                 continue
             
             trialPath ="/" + subject + "/" + movement
-            dataPath = "Raw_Data" + trialPath
-            SlicedResultsPath = "scaled_Data/processed_visual3dData/" +trialPath + "/sliced"
-            scaledResultPath = "scaled_Data/processed_visual3dData/" + trialPath + "/scaled"
-            flattenedResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/flattened"
-            centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
+            dataPath = "calculatedAngMomStuff" + trialPath
+            SlicedResultsPath = "scaled_Data/processed_AngMomData/" +trialPath + "/sliced"
+            scaledResultPath = "scaled_Data/processed_AngMomData/" + trialPath + "/scaled"
+            flattenedResultPath = "Processed_Data/processed_AngMomData/" + trialPath + "/flattened"
+            centeredResultPath = "Processed_Data/processed_AngMomData/" + trialPath + "/centered"
             #segmentLiftFrames = data[subject][movement]["lift"]
             #segmentImpactFrames = data[subject][movement]["impact"]
             #segmentFootDownFrames = data[subject][movement]["foot_down"]
@@ -188,12 +188,12 @@ for subject in subjects:
             segmentEndFrames = data[subject][movement]["end"]
             segmentBeginFrames = data[subject][movement]["start"]
 
-            Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
-"""         
+            #Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
+        
             for file in os.listdir(dataPath):
                 Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
 
-            randomDataPath = os.path.join(SlicedResultsPath + "/CoG_Position")
+            randomDataPath = os.path.join(SlicedResultsPath + "/theta")
             #Segments = Slicer.findTeepSegments(
             #        segmentBeginFrames,
             #        grfPath,
@@ -213,9 +213,9 @@ for subject in subjects:
                 #Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
             
                 Scaler.scaleDirectoryBeginningToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
-            for directory in sorted(os.listdir(scaledResultPath)):
-                Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
-           """
+            #for directory in sorted(os.listdir(scaledResultPath)):
+                #Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
+        
             #Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
             #for directory in sorted(os.listdir(flattenedResultPath)):
                 #Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
