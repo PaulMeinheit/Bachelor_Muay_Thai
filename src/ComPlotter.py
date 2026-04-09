@@ -37,25 +37,15 @@ from matplotlib.cm import ScalarMappable
 # CONFIGURATION  ← edit these
 # ──────────────────────────────────────────────────────────────────────────────
 
-X_VAR = "L_ELBOW_POSITION_X"   # variable name for the fore-aft axis
-Y_VAR = "L_ELBOW_POSITION_Y"   # variable name for the lateral axis
 
-# How many evenly-spaced frames at which to draw SD ellipses.
-N_ELLIPSES = 0
-
-# Opacity of individual trial traces.
-TRIAL_ALPHA = 0.12
-
-# Figure size in inches.
-FIG_SIZE = (15, 10)
 experts = ["E1", "E2", "E3"]
 novices = ["N1", "N2", "N3", "N4"]
 # ──────────────────────────────────────────────────────────────────────────────
 # DATA LOADING  ← replace with your own loading logic
 # ──────────────────────────────────────────────────────────────────────────────
 
-def load_data() -> pd.DataFrame:
-    data = BigLoader.loadallspecified(experts, "elbow")
+def load_data(group,movement) -> pd.DataFrame:
+    data = BigLoader.loadallspecified(group, movement)
     data.columns.names = ["subject", "trial", "variable"]
     return data
 
@@ -97,22 +87,26 @@ def make_coloured_segments(x: np.ndarray, z: np.ndarray, norm: mcolors.Normalize
 # ──────────────────────────────────────────────────────────────────────────────
 
 def plot_com_projection(
-    x_var:      str   = X_VAR,
-    z_var:      str   = Y_VAR,
-    n_ellipses: int   = N_ELLIPSES,
-    trial_alpha: float = TRIAL_ALPHA,
-    fig_size:   tuple = FIG_SIZE,
-) -> None:
+    group,
+    movement,
+    x_var,
+    y_var,
+    x_Name,
+    y_Name,
+    n_ellipses,
+    trial_alpha,
+    fig_size,
+):
 
-    df = load_data()
+    df = load_data(group, movement)
 
     X = get_variable(df, x_var)   # (n_frames, n_trials)
-    Z = get_variable(df, z_var)   # (n_frames, n_trials)
+    Y = get_variable(df, y_var)   # (n_frames, n_trials)
 
     n_frames, n_trials = X.shape
 
     mean_x = X.mean(axis=1)       # (n_frames,)
-    mean_z = Z.mean(axis=1)
+    mean_z = Y.mean(axis=1)
 
     cmap = plt.get_cmap("plasma")
     norm = mcolors.Normalize(vmin=0, vmax=1)
@@ -121,7 +115,7 @@ def plot_com_projection(
 
     # ── Individual trial traces ──────────────────────────────────────────────
     for i in range(n_trials):
-        ax.plot(X[:, i], Z[:, i],
+        ax.plot(X[:, i], Y[:, i],
                 color="steelblue", alpha=trial_alpha,
                 linewidth=0.8, zorder=1)
 
@@ -136,8 +130,8 @@ def plot_com_projection(
             zorder=4, label="End")
 
     # ── Aesthetics ───────────────────────────────────────────────────────────
-    ax.set_xlabel(x_var, fontsize=11)
-    ax.set_ylabel(z_var, fontsize=11)
+    ax.set_xlabel(x_Name, fontsize=11)
+    ax.set_ylabel(y_Name, fontsize=11)
     ax.set_title(
         f"CoM ground projection\n"
         f"({n_trials} trials)",
@@ -159,11 +153,27 @@ def plot_com_projection(
 # ENTRY POINT
 # ──────────────────────────────────────────────────────────────────────────────
 
+X_VAR = "L_SHOULDER_POSITION_X"   # variable name for the fore-aft axis
+Y_VAR = "L_SHOULDER_POSITION_Y"   # variable name for the vertical axis
+# How many evenly-spaced frames at which to draw SD ellipses.
+N_ELLIPSES = 0
+# Opacity of individual trial traces.
+TRIAL_ALPHA = 0.15
+# Figure size in inches.
+FIG_SIZE = (15, 10)
+GROUP = experts
+MOVEMENT = "elbow"
+
 if __name__ == "__main__":
     plot_com_projection(
+        group       = GROUP,
+        movement    = MOVEMENT,
         x_var       = X_VAR,
-        z_var       = Y_VAR,
+        y_var       = Y_VAR,
+        x_Name      = X_VAR,
+        y_Name      = Y_VAR,
         n_ellipses  = N_ELLIPSES,
         trial_alpha = TRIAL_ALPHA,
         fig_size    = FIG_SIZE,
+
     )
