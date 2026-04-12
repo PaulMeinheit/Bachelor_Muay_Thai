@@ -1,13 +1,5 @@
-import Flattener
-import Slicer
-import os
-import Scaler
-import Averager
-import Dataloader
-import matplotlib.pyplot as plt
-import Centerer
-# Structured dataset: subject -> movement -> frame types
-
+import numpy as np
+ 
 data = {
     "E1": {
         "teep": {
@@ -146,79 +138,97 @@ data = {
         }
     }
 }
-
-subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
-movements = ["elbow", "uppercut"]
-subjectmovemntExclusions = {
-    ("E1", "teep") : [],
-    ("E1", "roundhouse") : [],
-    ("E2", "teep") : [],
-    ("E2", "roundhouse") : [],
-    ("E3", "teep") : [],
-    ("E3", "roundhouse") : [],
-    ("N1", "teep") : [4],
-    ("N1", "roundhouse") : [1],
-    ("N2", "teep") : [],
-    ("N2", "roundhouse") : [2,3,4,5],
-    ("N3", "teep") : [8],
-    ("N3", "roundhouse") : [1],
-    ("N4", "teep") : [],
-    ("N4", "roundhouse") : []
+# ── helpers ──────────────────────────────────────────────────────────────────
+ 
+def compute_durations(start_list, end_list):
+    """
+    Pair each start with its corresponding end and return a list of durations.
+    If one list is longer than the other, extra values are ignored with a warning.
+    """
+    n_pairs = min(len(start_list), len(end_list))
+    if len(start_list) != len(end_list):
+        print(f"  ⚠  Length mismatch: {len(start_list)} starts vs {len(end_list)} ends "
+              f"→ using first {n_pairs} pairs")
+    durations = [end_list[i]/120*1000 - start_list[i]/120*1000 for i in range(n_pairs)]
+    return durations
+ 
+ 
+# ── main calculation ──────────────────────────────────────────────────────────
+ 
+results = {}          # per-participant, per-technique durations
+ 
+for participant, techniques in data.items():
+    results[participant] = {}
+    for technique in ("elbow", "uppercut"):
+        if technique not in techniques:
+            continue
+ 
+        starts = techniques[technique]["start"]
+        ends   = techniques[technique]["end"]
+ 
+        durations = compute_durations(starts, ends)
+        results[participant][technique] = durations
+ 
+ 
+# ── report ────────────────────────────────────────────────────────────────────
+ 
+print("=" * 65)
+print("  DURATION ANALYSIS  (all values in ms)")
+print("=" * 65)
+ 
+for participant, techniques in results.items():
+    print(f"\n{'─'*65}")
+    print(f"  Participant: {participant}")
+    print(f"{'─'*65}")
+    for technique, durations in techniques.items():
+        arr  = np.array(durations)
+        mean = np.mean(arr)
+        std  = np.std(arr, ddof=1)
+        print(f"  {technique.upper()}")
+        print(f"    Durations : {durations}")
+        print(f"    Mean      : {mean:.2f} ms")
+        print(f"    Std Dev   : {std:.2f} ms")
+ 
+# ── per-subject summary table ─────────────────────────────────────────────────
+ 
+print(f"\n{'='*65}")
+print("  PER-SUBJECT SUMMARY")
+print(f"{'='*65}")
+print(f"  {'Subject':<10} {'Technique':<12} {'N':>4} {'Mean (ms)':>12} {'SD (ms)':>10}")
+print(f"  {'─'*10} {'─'*12} {'─'*4} {'─'*12} {'─'*10}")
+ 
+for participant, techniques in results.items():
+    for technique, durations in techniques.items():
+        arr  = np.array(durations)
+        mean = np.mean(arr)
+        std  = np.std(arr, ddof=1)
+        print(f"  {participant:<10} {technique:<12} {len(durations):>4} {mean:>12.2f} {std:>10.2f}")
+ 
+# ── group-level stats (E and N separately, then overall) ─────────────────────
+ 
+group_durations = {
+    "E": {"elbow": [], "uppercut": []},
+    "N": {"elbow": [], "uppercut": []},
 }
-
-for subject in subjects:
-        for movement in movements:
-            if subject == "E2" and movement == "roundhouse":
-                continue
-            if subject == "N1" and movement == "teep":
-                continue
-            
-            trialPath ="/" + subject + "/" + movement
-            dataPath = "calculatedAngMomStuff" + trialPath
-            SlicedResultsPath = "scaled_Data/processed_AngMomData/" +trialPath + "/sliced"
-            scaledResultPath = "scaled_Data/processed_AngMomData/" + trialPath + "/scaled"
-            flattenedResultPath = "Processed_Data/processed_visualAngMomData/" + trialPath + "/flattened"
-            centeredResultPath = "Processed_Data/processed_visualAngMomData/" + trialPath + "/centered"
-            #segmentLiftFrames = data[subject][movement]["lift"]
-            #segmentImpactFrames = data[subject][movement]["impact"]
-            #segmentFootDownFrames = data[subject][movement]["foot_down"]
-            
-            # Frame numbers for each segment phase boundary
-            
-            segmentEndFrames = data[subject][movement]["end"]
-            segmentBeginFrames = data[subject][movement]["start"]
-
-            
-            #for file in os.listdir(dataPath):
-                #print(f"Slicing file: {file}")
-                #Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
-
-            randomDataPath = os.path.join(SlicedResultsPath + "/theta")
-            #Segments = Slicer.findTeepSegments(
-            #        segmentBeginFrames,
-            #        grfPath,
-            #        segmentLiftFrames,
-            #        segmentImpactFrames,
-            #        segmentFootDownFrames,
-            #
-            #)    
-            Segments = Slicer.findElbowUpperSegments(
-                    segmentBeginFrames,
-                    segmentEndFrames,
-                    randomDataPath
-            )
-            for directory in sorted(os.listdir(SlicedResultsPath)):
-                
-                print(directory)
-                #Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
-            
-                Scaler.scaleDirectoryBeginningToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
-            #for directory in sorted(os.listdir(scaledResultPath)):
-                #Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
-            #Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
-            #Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
-        
-            #Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
-            #for directory in sorted(os.listdir(flattenedResultPath)):
-                #Averager.average_scaled_files(os.path.join(flattenedResultPath, directory), subjectmovemntExclusions[(subject, movement)], output_file="averaged.csv")
-             
+ 
+for participant, techniques in results.items():
+    group = participant[0]          # "E" or "N"
+    for technique, durations in techniques.items():
+        group_durations[group][technique].extend(durations)
+ 
+print(f"\n{'='*65}")
+print("  GROUP STATS")
+print(f"{'='*65}")
+ 
+for group_label, techniques in group_durations.items():
+    print(f"\n  Group {group_label}")
+    print(f"  {'Technique':<12} {'N':>4} {'Mean (ms)':>12} {'SD (ms)':>10}")
+    print(f"  {'─'*12} {'─'*4} {'─'*12} {'─'*10}")
+    for technique, durations in techniques.items():
+        arr  = np.array(durations)
+        mean = np.mean(arr)
+        std  = np.std(arr, ddof=1)
+        print(f"  {technique:<12} {len(durations):>4} {mean:>12.2f} {std:>10.2f}")
+ 
+print()
+ 

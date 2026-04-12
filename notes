@@ -6,23 +6,22 @@
 
 
 Left elbow:  
-   Total duration <- report as table
-   elbow speed at impact velocity overall  <- plot it first, if nothing fruitful, exclude
-   shoulder trajectory
-   pelvis rotation  <- about Z axis
-   Fz trajectories
+   Total duration <- report as table x
+   shoulder trajectory x
+   pelvis rotation  <- about Z axis i dont know whats wrong
+   Fz trajectories 
    COM (ground projection) and COP trajectories
 
 Uppercut:  
-   Total duration <- report as table
-   Wrist Speed  
-   distance from wrist to thorax <- wrist joint position and thorax position AP dir
-   pelvis rotation  <- about Z axis
+   Total duration <- report as table x
+   Wrist Speed   x
+
+   pelvis rotation  <- about Z axis same problem as elbow
    Fz trajectories
    COM (ground projection) and COP trajectories
-   Block behaviour
+   Block behaviour x
 
-  Teep:  
+Teep:  
       Duration of kick phase (double support, single support, double support) <- report as table
       Rate of chnage of total angular momnetum with respect to full body com about each axis 
       AMAC
