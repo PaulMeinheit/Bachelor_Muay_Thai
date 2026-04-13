@@ -58,7 +58,7 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
             continue
         if subject == "N1" and movement == "teep":
             continue
-        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/scaled_Data/processed_AngMomData/"+subject+"/"+movement+"/scaled/AMACscalar"
+        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/scaled_Data/processed_AngMomData/"+ subject +"/" +movement +"/scaled/AMACscalar"
         if not os.path.exists(path):
             continue
         files = [f for f in os.listdir(path) if f not in FailExclusions[(subject, movement)]]
@@ -75,7 +75,4 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
         subjectDataList.append(subjectData)
     BigData = pd.concat(subjectDataList, axis=1, keys=subjects)
   
-    return BigData   
-
-
-loadallspecified(["E1", "E2", "E3"], "elbow")
+    return BigData

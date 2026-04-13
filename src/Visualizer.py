@@ -52,7 +52,10 @@ mpl.rcParams.update({
 # ──────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION  ← edit these
 # ──────────────────────────────────────────────────────────────────────────────
-experts = ["E1","E2","E3"]
+"""e1 = ["E1"]
+e2 = ["E2"]
+e3 = ["E3"]"""
+experts = ["E1", "E2", "E3"]
 novices = ["N1", "N2", "N3", "N4"]
  
 VARIABLE    = "Pelvis_CoG_pos_Z"
@@ -360,7 +363,7 @@ def plot_mean_sd(
     # Individual trial traces
     for row in matrix:
         ax.plot(time_axis, row,
-                color=_C["trial"], alpha=0.18, linewidth=0.7, zorder=1)
+                color=_C["trial"], alpha=0.5, linewidth=0.7, zorder=1)
  
     # ± 1 SD band
     _faded_band(ax, time_axis, mean - std, mean + std,
@@ -433,17 +436,15 @@ def plot_mean_sd_comparison(
             color=_C["novice"], linewidth=2.0, label="Novices  mean", zorder=4)
  
     _apply_grid(ax)
- 
-    ax.set_xlabel("scaled time", fontsize=11, color="0.3", labelpad=6)
-    ax.set_ylabel(label, fontsize=11, color="0.3", labelpad=6)
-    ax.set_title(label, fontsize=13, fontweight="medium", pad=12, loc="left")
-    ax.text(0.0, 1.02, "Experts vs Novices  ·  Mean ± 1 SD",
-            transform=ax.transAxes, fontsize=9, color="0.5")
- 
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+
+    ax.set_xlabel("scaled time", fontsize=16, color="0.3", labelpad=6)
+    ax.set_ylabel(label, fontsize=16, color="0.3", labelpad=6)
+    ax.set_title(label, fontsize=20, fontweight="medium", pad=12, loc="left")
+
+    ax.legend(frameon=True, fontsize=14, loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8,
               ncol=2)
-    ax.tick_params(labelsize=9, colors="0.4")
+    ax.tick_params(labelsize=14, colors="0.4")
     ax.autoscale_view()
 
     plt.tight_layout()
@@ -841,24 +842,42 @@ AMOvariables = [
  
 if __name__ == "__main__":
     # Example usage with movement argument
-    movement = "uppercut"  # or "roundhouse", "teep", etc.
-
-    """# Single group — all expert trials + mean
+    movement = "roundhouse"  # or "roundhouse", "teep", etc.
+    plot_mean_sd_comparison(
+        variable = "R_ShankAMAC",
+        movement = movement,
+        label = "Right Shank AMA")
+        
+"""    # Single group — all expert trials + mean
     plot_trajectory_3d(
-        variable_base = "R_Foot_CoG_pos",
+        variable_base = "R_WRIST_POSITION",
         movement      = movement,
-        group         = novices,
+        group         = e1,
+        group_label   = "Experts",
+        mean_color    = _C["expert"],
+    )
+    plot_trajectory_3d(
+        variable_base = "R_WRIST_POSITION",
+        movement      = movement,
+        group         = e2,
+        group_label   = "Experts",
+        mean_color    = _C["expert"],
+    )
+    plot_trajectory_3d(
+        variable_base = "R_WRIST_POSITION",
+        movement      = movement,
+        group         = e3,
         group_label   = "Experts",
         mean_color    = _C["expert"],
     )
 
     # Expert vs Novice comparison
     plot_trajectory_3d_comparison(
-        variable_base = "R_Foot_CoG_pos",
+        variable_base = "R_WRIST_POSITION",
         movement      = movement,
-    )"""
+    )
     
-    """plot_mean_sd_norm(
+    plot_mean_sd_norm(
         variable_base = "R_Foot_CoG_vel",
         movement      = movement,
         group=experts,
@@ -868,13 +887,9 @@ if __name__ == "__main__":
         movement      = movement,
         label         = "Right Foot CoG Velocity (norm)",
     )"""
-    """analyze_norm_max_per_trial(
+""" analyze_norm_max_per_trial(
         variable_base = "R_Hand_CoG_vel",
         movement      = movement,
     )"""
-    for var in AMAvariables:
-        plot_mean_sd_comparison(
-            variable = var,
-            movement = movement,
-            label    = _format_variable_label(var),
-        )
+    
+    
