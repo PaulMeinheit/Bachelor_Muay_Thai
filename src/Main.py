@@ -162,7 +162,7 @@ data = {
 }
 
 subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
-movements = ["elbow", "uppercut"]
+movements = ["teep", "roundhouse"]
 subjectmovemntExclusions = {
     ("E1", "teep") : [],
     ("E1", "roundhouse") : [],
@@ -188,51 +188,51 @@ for subject in subjects:
                 continue
             
             trialPath ="/" + subject + "/" + movement
-            dataPath = "Raw_Data" + trialPath
-            SlicedResultsPath = "scaled_Data/processed_visual3dData/" +trialPath + "/sliced"
-            scaledResultPath = "scaled_Data/processed_visual3dData/" + trialPath + "/scaled"
-            flattenedResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/flattened"
-            centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
-            #segmentLiftFrames = data[subject][movement]["lift"]
-            #segmentImpactFrames = data[subject][movement]["impact"]
-            #segmentFootDownFrames = data[subject][movement]["foot_down"]
+            dataPath = "newAngMom" + trialPath
+            SlicedResultsPath = "scaled_Data/processed_JustAngMomData/" +trialPath + "/sliced"
+            scaledResultPath = "scaled_Data/processed_JustAngMomData/" + trialPath + "/scaled"
+            flattenedResultPath = "Processed_Data/processed_JustAngMomData/" + trialPath + "/flattened"
+            #centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
+            segmentLiftFrames = data[subject][movement]["lift"]
+            segmentImpactFrames = data[subject][movement]["impact"]
+            segmentFootDownFrames = data[subject][movement]["foot_down"]
             
             # Frame numbers for each segment phase boundary
             
-            segmentEndFrames = data[subject][movement]["end"]
-            segmentMiddleFrame = data[subject][movement]["impact"]
-            segmentBeginFrames = data[subject][movement]["start"]
+            #segmentEndFrames = data[subject][movement]["end"]
+            #segmentMiddleFrame = data[subject][movement]["impact"]
+            #segmentBeginFrames = data[subject][movement]["start"]
 
-            
+            segmentBeginFrames = Slicer.calcBeginnframe(segmentLiftFrames)
             for file in os.listdir(dataPath):
                 print(f"Slicing file: {file}")
                 Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
 
-            randomDataPath = os.path.join(SlicedResultsPath + "/JointPositions")
-            #Segments = Slicer.findTeepSegments(
-            #        segmentBeginFrames,
-            #        grfPath,
-            #        segmentLiftFrames,
-            #        segmentImpactFrames,
-            #        segmentFootDownFrames,
-            #
-            #)    
-            Segments = Slicer.findElbowUpperSegments(
+            randomDataPath = os.path.join(SlicedResultsPath + "/AngMom")
+            Segments = Slicer.findTeepSegments(
                     segmentBeginFrames,
-                    segmentMiddleFrame,
-                    segmentEndFrames,
-                    randomDataPath
-            )
+                    randomDataPath,
+                    segmentLiftFrames,
+                    segmentImpactFrames,
+                    segmentFootDownFrames,
+            
+            )    
+            #Segments = Slicer.findElbowUpperSegments(
+            #        segmentBeginFrames,
+            #        segmentMiddleFrame,
+            #        segmentEndFrames,
+            #        randomDataPath
+            #)
             for directory in sorted(os.listdir(SlicedResultsPath)):
                 
                 print(directory)
-                #Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
+                Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
             
-                Scaler.scaleDirectoryBeginningToImpactToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
-            for directory in sorted(os.listdir(scaledResultPath)):
-                Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
-            Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
-            Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
+                #Scaler.scaleDirectoryBeginningToImpactToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
+            #for directory in sorted(os.listdir(scaledResultPath)):
+                #Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
+            #Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
+            #Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
         
             #Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
             #for directory in sorted(os.listdir(flattenedResultPath)):

@@ -27,7 +27,7 @@ def sliceData(dataPath, outputPath, segmentBeginnframes):
 
     stem = Path(dataPath).stem
     
-    data = Dataloader.loadRawData(dataPath)
+    data = Dataloader.loadData(dataPath)
     internalFolder = os.path.join(outputPath,stem)
 
     
@@ -60,8 +60,6 @@ def findTeepSegments(segmentBeginnframe, groundReactionPath, liftOffFrames, impa
     segmentData = []
     counter = 0
     for file in sorted(os.listdir(groundReactionPath)):
-        data = pandas.read_csv(os.path.join(groundReactionPath, file), header=[0, 1])
-        
         # Build segment as [phase0_start, phase0_end, phase1_end, phase2_end, phase3_end]
         # Phase 0: 0 to liftOffFrame
         # Phase 1: liftOffFrame to impactFrame

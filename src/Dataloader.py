@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 def loadData(filepath):
-    loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0])
+    loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep=',', header= [0],skiprows=[1, 2])
     return loadedData
 def loadRawData(filepath):
     loadedData = pandas.read_csv(filepath_or_buffer = filepath, sep='\t', header= [1,4])

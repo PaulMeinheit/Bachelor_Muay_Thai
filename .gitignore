@@ -10,6 +10,7 @@ processed_AngMomData/
 *.so
 slicedResults/
 scaledResults/
+scaled_Data/
 AveragedResults/
 plots/
 # Distribution / packaging

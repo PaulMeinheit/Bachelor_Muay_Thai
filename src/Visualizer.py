@@ -465,8 +465,7 @@ def plot_mean_sd_comparison(
     plt.show()
 
 
-
-def plot_mean_sd_FiRstDifernetiatecomparison(
+def plot_mean_sd_FirstGradientComparison(
     variable:    str,
     movement:    str,
     shade_alpha: float = SHADE_ALPHA,
@@ -481,15 +480,19 @@ def plot_mean_sd_FiRstDifernetiatecomparison(
 ) -> None:
     df_experts = load_group(experts, movement)
     df_novices = load_group(novices, movement)
- 
+
     t_exp, mat_exp = build_matrix(df_experts, variable)
     t_nov, mat_nov = build_matrix(df_novices, variable)
- 
-    mean_exp = np.gradient(mat_exp,axis=0).mean(axis=0);  std_exp = np.gradient(mat_exp,axis =0).std(axis=0, ddof=1)
-    mean_nov = mat_nov.mean(axis=0);  std_nov = mat_nov.std(axis=0, ddof=1)
- 
+
+    # Compute first gradient per trial along the time axis
+    grad_exp = np.array([np.gradient(row, t_exp) for row in mat_exp])
+    grad_nov = np.array([np.gradient(row, t_nov) for row in mat_nov])
+
+    mean_exp = grad_exp.mean(axis=0);  std_exp = grad_exp.std(axis=0, ddof=1)
+    mean_nov = grad_nov.mean(axis=0);  std_nov = grad_nov.std(axis=0, ddof=1)
+
     fig, ax = plt.subplots(figsize=fig_size)
- 
+
     # Experts band + mean
     _faded_band(ax, t_exp, mean_exp - std_exp, mean_exp + std_exp,
                 face_color=_C["expert"], edge_color=_C["expert"],
@@ -497,7 +500,7 @@ def plot_mean_sd_FiRstDifernetiatecomparison(
                 label="Experts  ±1 SD")
     ax.plot(t_exp, mean_exp,
             color=_C["expert"], linewidth=2.0, label="Experts  mean", zorder=4)
- 
+
     # Novices band + mean
     _faded_band(ax, t_nov, mean_nov - std_nov, mean_nov + std_nov,
                 face_color=_C["novice"], edge_color=_C["novice"],
@@ -505,14 +508,13 @@ def plot_mean_sd_FiRstDifernetiatecomparison(
                 label="Novices  ±1 SD")
     ax.plot(t_nov, mean_nov,
             color=_C["novice"], linewidth=2.0, label="Novices  mean", zorder=4)
- 
+
     _apply_grid(ax)
 
     ax.set_xlabel(x_label if x_label is not None else "scaled time", fontsize=int(16*text_size), color="0.3", labelpad=6)
     ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(16*text_size), color="0.3", labelpad=6)
     if title is None:
         title = label
-    #ax.set_title(title, fontsize=int(20*text_size), fontweight="medium", pad=12, loc="left")
 
     ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.5,
@@ -521,7 +523,7 @@ def plot_mean_sd_FiRstDifernetiatecomparison(
     ax.autoscale_view()
 
     plt.tight_layout()
-    plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_comparison.png", dpi=300)
+    plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_firstgradient_comparison.png", dpi=300)
     plt.show()
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -987,13 +989,7 @@ if __name__ == "__main__":
         text_size = 1.3
     )
     """
-    plot_mean_sd_comparison(
-        variable = "R_WRIST_POSITION_Z",
-        movement = movement,
-        label = "Right hand Z position",
-        text_size = 1.3
-    )
-    plot_mean_s
+    
     """
     plot_mean_sd_norm(
         variable_base = "R_Foot_CoG_vel",
