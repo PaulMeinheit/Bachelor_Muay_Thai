@@ -96,6 +96,11 @@ def plot_com_projection(
     n_ellipses,
     trial_alpha,
     fig_size,
+    text_size=1.0,
+    title=None,
+    x_label=None,
+    y_label=None,
+    show_n_trials=False,
 ):
 
     df = load_data(group, movement)
@@ -130,17 +135,21 @@ def plot_com_projection(
             zorder=4, label="End")
 
     # ── Aesthetics ───────────────────────────────────────────────────────────
-    ax.set_xlabel(x_Name, fontsize=11)
-    ax.set_ylabel(y_Name, fontsize=11)
+    ax.set_xlabel(x_label if x_label is not None else x_Name, fontsize=int(11*text_size))
+    ax.set_ylabel(y_label if y_label is not None else y_Name, fontsize=int(11*text_size))
+    if title is None:
+        if show_n_trials:
+            title = f"CoM ground projection\n({n_trials} trials)"
+        else:
+            title = "CoM ground projection"
     ax.set_title(
-        f"CoM ground projection\n"
-        f"({n_trials} trials)",
-        fontsize=12, pad=10,
+        title,
+        fontsize=int(12*text_size), pad=10,
     )
     ax.set_aspect("equal")
-    ax.legend(frameon=False, fontsize=10, loc="best")
+    ax.legend(frameon=False, fontsize=int(10*text_size), loc="best")
     ax.spines[["top", "right"]].set_visible(False)
-    ax.tick_params(labelsize=10)
+    ax.tick_params(labelsize=int(10*text_size))
     ax.grid(color="0.92", linewidth=0.6)
 
     plt.tight_layout()
@@ -159,6 +168,11 @@ def plot_com_projection_comparison_clean(
     fig_size=(12, 12),
     expert_color="crimson",
     novice_color="steelblue",
+    text_size=1.0,
+    title=None,
+    x_label=None,
+    y_label=None,
+    show_n_trials=False,
 ):
     """
     Plot CoM ground projection for both Experts and Novices in the same figure.
@@ -202,8 +216,9 @@ def plot_com_projection_comparison_clean(
     fig, ax = plt.subplots(figsize=fig_size)
     
     # ── Experts mean path (solid color) ──────────────────────────────────────
+    expert_label = "Experts" if not show_n_trials else f"Experts  (n={n_trials_exp})"
     ax.plot(mean_x_exp, mean_z_exp, color="#C0392B", linewidth=2.8, 
-            zorder=3, label=f"Experts  (n={n_trials_exp})")
+            zorder=3, label=expert_label)
     
     # Start/end markers for experts
     ax.plot(mean_x_exp[0],  mean_z_exp[0],  "o", color="#C0392B", 
@@ -212,8 +227,9 @@ def plot_com_projection_comparison_clean(
             markersize=8, zorder=4, markeredgecolor="darkred", markeredgewidth=1.5)
     
     # ── Novices mean path (solid color) ──────────────────────────────────────
+    novice_label = "Novices" if not show_n_trials else f"Novices  (n={n_trials_nov})"
     ax.plot(mean_x_nov, mean_z_nov, color="#2874A6", linewidth=2.8, 
-            zorder=3, label=f"Novices  (n={n_trials_nov})")
+            zorder=3, label=novice_label)
     
     # Start/end markers for novices
     ax.plot(mean_x_nov[0],  mean_z_nov[0],  "o", color="#2874A6", 
@@ -233,14 +249,16 @@ def plot_com_projection_comparison_clean(
                               markerfacecolor="gray", markersize=7, label="End")
     
     ax.legend(handles=[expert_line, novice_line, start_marker, end_marker],
-              frameon=True, fontsize=10, loc="best", framealpha=0.95)
+              frameon=True, fontsize=int(10*text_size), loc="best", framealpha=0.95)
     
     # ── Aesthetics ───────────────────────────────────────────────────────────
-    ax.set_xlabel(x_Name, fontsize=12, fontweight="medium")
-    ax.set_ylabel(y_Name, fontsize=12, fontweight="medium")
+    ax.set_xlabel(x_label if x_label is not None else x_Name, fontsize=int(12*text_size), fontweight="medium")
+    ax.set_ylabel(y_label if y_label is not None else y_Name, fontsize=int(12*text_size), fontweight="medium")
+    if title is None:
+        title = f"CoM Ground Projection: Experts vs Novices  ·  {movement.capitalize()}"
     ax.set_title(
-        f"CoM Ground Projection: Experts vs Novices  ·  {movement.capitalize()}",
-        fontsize=13, fontweight="medium", pad=12,
+        title,
+        fontsize=int(13*text_size), fontweight="medium", pad=12,
     )
     ax.set_aspect("equal")
     
@@ -261,7 +279,7 @@ def plot_com_projection_comparison_clean(
     ax.set_ylim(y_center - max_range/2, y_center + max_range/2)
     
     ax.spines[["top", "right"]].set_visible(False)
-    ax.tick_params(labelsize=10)
+    ax.tick_params(labelsize=int(10*text_size))
     ax.grid(color="0.92", linewidth=0.6, alpha=0.8)
     
     plt.tight_layout()
@@ -271,8 +289,8 @@ def plot_com_projection_comparison_clean(
 # ENTRY POINT
 # ──────────────────────────────────────────────────────────────────────────────
 
-X_VAR = "Pelvis_CoG_pos_X"   # variable name for the fore-aft axis
-Y_VAR = "Pelvis_CoG_pos_Y"   # variable name for the vertical axis
+X_VAR = "L_ELBOW_POSITION_X"   # variable name for the fore-aft axis
+Y_VAR = "L_ELBOW_POSITION_Y"   # variable name for the vertical axis
 # How many evenly-spaced frames at which to draw SD ellipses.
 N_ELLIPSES = 0
 # Opacity of individual trial traces.
@@ -280,9 +298,10 @@ TRIAL_ALPHA = 0.2
 # Figure size in inches.
 FIG_SIZE = (15, 10)
 GROUP = experts
-MOVEMENT = "teep"
+MOVEMENT = "elbow"
 
 if __name__ == "__main__":
+    """
     plot_com_projection(
         group       = GROUP,
         movement    = MOVEMENT,
@@ -293,8 +312,21 @@ if __name__ == "__main__":
         n_ellipses  = N_ELLIPSES,
         trial_alpha = TRIAL_ALPHA,
         fig_size    = FIG_SIZE,
-
     )
+
+    plot_com_projection(
+        group       = novices,
+        movement    = MOVEMENT,
+        x_var       = X_VAR,
+        y_var       = Y_VAR,
+        x_Name      = X_VAR,
+        y_Name      = Y_VAR,
+        n_ellipses  = N_ELLIPSES,
+        trial_alpha = TRIAL_ALPHA,
+        fig_size    = FIG_SIZE,
+
+    )"""
+
     plot_com_projection_comparison_clean(
         movement    = MOVEMENT,
         x_var       = X_VAR,
@@ -302,4 +334,8 @@ if __name__ == "__main__":
         x_Name      = X_VAR,
         y_Name      = Y_VAR,
         fig_size    = FIG_SIZE,
+        text_size=1.7,
+        x_label= "Left Elbow X (m)",
+        y_label= "Left Elbow Y (m)",
+        title=f"Left Elbow Position: Experts vs Novices"
     )

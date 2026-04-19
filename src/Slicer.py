@@ -3,7 +3,7 @@ import Dataloader
 import os
 from pathlib import Path
 
-def findElbowUpperSegments(segmentBeginFrames, segmentEndFrames,groundReactionPath):
+def findElbowUpperSegments(segmentBeginFrames,segmentMiddleFrame, segmentEndFrames,groundReactionPath):
     """
     Build segment data from manually-provided frame numbers.
     
@@ -16,16 +16,18 @@ def findElbowUpperSegments(segmentBeginFrames, segmentEndFrames,groundReactionPa
     for file in sorted(os.listdir(groundReactionPath)):
         segmentData.append([
             0,
+            segmentMiddleFrame[i] - segmentBeginFrames[i],
             segmentEndFrames[i] - segmentBeginFrames[i]
         ])
         i += 1
     
     return segmentData
+
 def sliceData(dataPath, outputPath, segmentBeginnframes):
 
     stem = Path(dataPath).stem
     
-    data = Dataloader.loadData(dataPath)
+    data = Dataloader.loadRawData(dataPath)
     internalFolder = os.path.join(outputPath,stem)
 
     

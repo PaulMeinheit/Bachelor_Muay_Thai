@@ -188,11 +188,11 @@ for subject in subjects:
                 continue
             
             trialPath ="/" + subject + "/" + movement
-            dataPath = "calculatedAngMomStuff" + trialPath
-            SlicedResultsPath = "scaled_Data/processed_AngMomData/" +trialPath + "/sliced"
-            scaledResultPath = "scaled_Data/processed_AngMomData/" + trialPath + "/scaled"
-            flattenedResultPath = "Processed_Data/processed_visualAngMomData/" + trialPath + "/flattened"
-            centeredResultPath = "Processed_Data/processed_visualAngMomData/" + trialPath + "/centered"
+            dataPath = "Raw_Data" + trialPath
+            SlicedResultsPath = "scaled_Data/processed_visual3dData/" +trialPath + "/sliced"
+            scaledResultPath = "scaled_Data/processed_visual3dData/" + trialPath + "/scaled"
+            flattenedResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/flattened"
+            centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
             #segmentLiftFrames = data[subject][movement]["lift"]
             #segmentImpactFrames = data[subject][movement]["impact"]
             #segmentFootDownFrames = data[subject][movement]["foot_down"]
@@ -200,14 +200,15 @@ for subject in subjects:
             # Frame numbers for each segment phase boundary
             
             segmentEndFrames = data[subject][movement]["end"]
+            segmentMiddleFrame = data[subject][movement]["impact"]
             segmentBeginFrames = data[subject][movement]["start"]
 
             
-            #for file in os.listdir(dataPath):
-                #print(f"Slicing file: {file}")
-                #Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
+            for file in os.listdir(dataPath):
+                print(f"Slicing file: {file}")
+                Slicer.sliceData(os.path.join(dataPath, file), SlicedResultsPath, segmentBeginFrames)
 
-            randomDataPath = os.path.join(SlicedResultsPath + "/theta")
+            randomDataPath = os.path.join(SlicedResultsPath + "/JointPositions")
             #Segments = Slicer.findTeepSegments(
             #        segmentBeginFrames,
             #        grfPath,
@@ -218,6 +219,7 @@ for subject in subjects:
             #)    
             Segments = Slicer.findElbowUpperSegments(
                     segmentBeginFrames,
+                    segmentMiddleFrame,
                     segmentEndFrames,
                     randomDataPath
             )
@@ -226,11 +228,11 @@ for subject in subjects:
                 print(directory)
                 #Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
             
-                Scaler.scaleDirectoryBeginningToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
-            #for directory in sorted(os.listdir(scaledResultPath)):
-                #Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
-            #Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
-            #Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
+                Scaler.scaleDirectoryBeginningToImpactToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
+            for directory in sorted(os.listdir(scaledResultPath)):
+                Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
+            Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
+            Centerer.center_cog(os.path.join(flattenedResultPath, "CoG_Position"), os.path.join(centeredResultPath, "CoG_Position"))
         
             #Averager.average_scaled_files(os.path.join(centeredResultPath, "CoG_Position"), subjectmovemntExclusions[(subject, movement)])
             #for directory in sorted(os.listdir(flattenedResultPath)):

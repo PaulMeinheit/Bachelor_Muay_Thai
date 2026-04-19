@@ -57,8 +57,7 @@ e2 = ["E2"]
 e3 = ["E3"]"""
 experts = ["E1", "E2", "E3"]
 novices = ["N1", "N2", "N3", "N4"]
- 
-VARIABLE    = "Pelvis_CoG_pos_Z"
+
 SHADE_ALPHA = 0.20       # opacity of the ± 1 SD band
 FADE_EDGES  = 0.12       # fraction of trial to fade in/out (0 = hard edges)
 FIG_SIZE    = (15, 7.5)
@@ -350,6 +349,11 @@ def plot_mean_sd(
     fade_edges:  float = FADE_EDGES,
     fig_size:    tuple = FIG_SIZE,
     group:       list  = None,
+    text_size:   float = 1.0,
+    title:       str   = None,
+    x_label:     str   = None,
+    y_label:     str   = None,
+    show_n_trials: bool = False,
 ) -> None:
     df                = load_group(group, movement)
     time_axis, matrix = build_matrix(df, variable)
@@ -377,19 +381,21 @@ def plot_mean_sd(
  
     _apply_grid(ax)
  
-    ax.set_xlabel("Frame", fontsize=11, color="0.3", labelpad=6)
-    ax.set_ylabel(_format_variable_label(variable), fontsize=11, color="0.3", labelpad=6)
+    ax.set_xlabel(x_label if x_label is not None else "Frame", fontsize=int(11*text_size), color="0.3", labelpad=6)
+    ax.set_ylabel(y_label if y_label is not None else _format_variable_label(variable), fontsize=int(11*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = _format_variable_label(variable)
     ax.set_title(
-        f"{_format_variable_label(variable)}",
-        fontsize=13, fontweight="medium", pad=12, loc="left",
+        title,
+        fontsize=int(13*text_size), fontweight="medium", pad=12, loc="left",
     )
     ax.text(0.0, 1.02,
             f"Mean ± 1 SD  ·  {n_trials} trial{'s' if n_trials != 1 else ''}",
-            transform=ax.transAxes, fontsize=9, color="0.5")
- 
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+            transform=ax.transAxes, fontsize=int(9*text_size), color="0.5")
+
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8)
-    ax.tick_params(labelsize=9, colors="0.4")
+    ax.tick_params(labelsize=int(9*text_size), colors="0.4")
     ax.autoscale_view()
  
     plt.tight_layout()
@@ -407,6 +413,11 @@ def plot_mean_sd_comparison(
     fade_edges:  float = FADE_EDGES,
     fig_size:    tuple = FIG_SIZE,
     label:       str   = None,
+    text_size:   float = 1.0,
+    title:       str   = None,
+    x_label:     str   = None,
+    y_label:     str   = None,
+    show_n_trials: bool = False,
 ) -> None:
     df_experts = load_group(experts, movement)
     df_novices = load_group(novices, movement)
@@ -437,20 +448,81 @@ def plot_mean_sd_comparison(
  
     _apply_grid(ax)
 
-    ax.set_xlabel("scaled time", fontsize=16, color="0.3", labelpad=6)
-    ax.set_ylabel(label, fontsize=16, color="0.3", labelpad=6)
-    ax.set_title(label, fontsize=20, fontweight="medium", pad=12, loc="left")
+    ax.set_xlabel(x_label if x_label is not None else "scaled time", fontsize=int(16*text_size), color="0.3", labelpad=6)
+    ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(16*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = label
+    #ax.set_title(title, fontsize=int(20*text_size), fontweight="medium", pad=12, loc="left")
 
-    ax.legend(frameon=True, fontsize=14, loc="upper right",
-              framealpha=0.92, edgecolor="0.88", borderpad=0.8,
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
+              framealpha=0.92, edgecolor="0.88", borderpad=0.5,
               ncol=2)
-    ax.tick_params(labelsize=14, colors="0.4")
+    ax.tick_params(labelsize=int(14*text_size), colors="0.4")
     ax.autoscale_view()
 
     plt.tight_layout()
     plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_comparison.png", dpi=300)
     plt.show()
 
+
+
+def plot_mean_sd_FiRstDifernetiatecomparison(
+    variable:    str,
+    movement:    str,
+    shade_alpha: float = SHADE_ALPHA,
+    fade_edges:  float = FADE_EDGES,
+    fig_size:    tuple = FIG_SIZE,
+    label:       str   = None,
+    text_size:   float = 1.0,
+    title:       str   = None,
+    x_label:     str   = None,
+    y_label:     str   = None,
+    show_n_trials: bool = False,
+) -> None:
+    df_experts = load_group(experts, movement)
+    df_novices = load_group(novices, movement)
+ 
+    t_exp, mat_exp = build_matrix(df_experts, variable)
+    t_nov, mat_nov = build_matrix(df_novices, variable)
+ 
+    mean_exp = np.gradient(mat_exp,axis=0).mean(axis=0);  std_exp = np.gradient(mat_exp,axis =0).std(axis=0, ddof=1)
+    mean_nov = mat_nov.mean(axis=0);  std_nov = mat_nov.std(axis=0, ddof=1)
+ 
+    fig, ax = plt.subplots(figsize=fig_size)
+ 
+    # Experts band + mean
+    _faded_band(ax, t_exp, mean_exp - std_exp, mean_exp + std_exp,
+                face_color=_C["expert"], edge_color=_C["expert"],
+                max_alpha=shade_alpha, fade=fade_edges,
+                label="Experts  ±1 SD")
+    ax.plot(t_exp, mean_exp,
+            color=_C["expert"], linewidth=2.0, label="Experts  mean", zorder=4)
+ 
+    # Novices band + mean
+    _faded_band(ax, t_nov, mean_nov - std_nov, mean_nov + std_nov,
+                face_color=_C["novice"], edge_color=_C["novice"],
+                max_alpha=shade_alpha, fade=fade_edges,
+                label="Novices  ±1 SD")
+    ax.plot(t_nov, mean_nov,
+            color=_C["novice"], linewidth=2.0, label="Novices  mean", zorder=4)
+ 
+    _apply_grid(ax)
+
+    ax.set_xlabel(x_label if x_label is not None else "scaled time", fontsize=int(16*text_size), color="0.3", labelpad=6)
+    ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(16*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = label
+    #ax.set_title(title, fontsize=int(20*text_size), fontweight="medium", pad=12, loc="left")
+
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
+              framealpha=0.92, edgecolor="0.88", borderpad=0.5,
+              ncol=2)
+    ax.tick_params(labelsize=int(14*text_size), colors="0.4")
+    ax.autoscale_view()
+
+    plt.tight_layout()
+    plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_comparison.png", dpi=300)
+    plt.show()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PLOTTING — norm comparison (2-D mean ± SD)
@@ -463,6 +535,11 @@ def plot_mean_sd_norm(
     fade_edges:    float = FADE_EDGES,
     fig_size:      tuple = FIG_SIZE,
     group:         list  = None,
+    text_size:     float = 1.0,
+    title:         str   = None,
+    x_label:       str   = None,
+    y_label:       str   = None,
+    show_n_trials: bool = False,
 ) -> None:
     """
     Plot the Euclidean norm of a multivariate variable with mean ± SD band.
@@ -506,19 +583,22 @@ def plot_mean_sd_norm(
     
     _apply_grid(ax)
     
-    ax.set_xlabel("Frame", fontsize=11, color="0.3", labelpad=6)
-    ax.set_ylabel(f"{_format_variable_label(variable_base)} (norm)", fontsize=11, color="0.3", labelpad=6)
+    ax.set_xlabel(x_label if x_label is not None else "Frame", fontsize=int(11*text_size), color="0.3", labelpad=6)
+    default_y_label = f"{_format_variable_label(variable_base)} (norm)"
+    ax.set_ylabel(y_label if y_label is not None else default_y_label, fontsize=int(11*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = default_y_label
     ax.set_title(
-        f"{_format_variable_label(variable_base)} (norm)",
-        fontsize=13, fontweight="medium", pad=12, loc="left",
+        title,
+        fontsize=int(13*text_size), fontweight="medium", pad=12, loc="left",
     )
     ax.text(0.0, 1.02,
             f"Mean ± 1 SD  ·  {n_trials} trial{'s' if n_trials != 1 else ''}",
-            transform=ax.transAxes, fontsize=9, color="0.5")
+            transform=ax.transAxes, fontsize=int(9*text_size), color="0.5")
     
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8)
-    ax.tick_params(labelsize=9, colors="0.4")
+    ax.tick_params(labelsize=int(9*text_size), colors="0.4")
     ax.autoscale_view()
     
     plt.tight_layout()
@@ -532,6 +612,11 @@ def plot_mean_sd_comparison_norm(
     fade_edges:    float = FADE_EDGES,
     fig_size:      tuple = FIG_SIZE,
     label:         str   = None,
+    text_size:     float = 1.0,
+    title:         str   = None,
+    x_label:       str   = None,
+    y_label:       str   = None,
+    show_n_trials: bool = False,
 ) -> None:
     """
     Plot the Euclidean norm of a multivariate variable comparing Experts vs Novices
@@ -576,21 +661,23 @@ def plot_mean_sd_comparison_norm(
     
     _apply_grid(ax)
     
-    ax.set_xlabel("scaled time", fontsize=11, color="0.3", labelpad=6)
+    ax.set_xlabel("scaled time", fontsize=int(11*text_size), color="0.3", labelpad=6)
     
     # Auto-generate label if not provided
     if label is None:
         label = f"{_format_variable_label(variable_base)} (norm)"
     
-    ax.set_ylabel(label, fontsize=11, color="0.3", labelpad=6)
-    ax.set_title(label, fontsize=13, fontweight="medium", pad=12, loc="left")
+    ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(11*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = label
+    ax.set_title(title, fontsize=int(13*text_size), fontweight="medium", pad=12, loc="left")
     ax.text(0.0, 1.02, "Experts vs Novices  ·  Mean ± 1 SD",
-            transform=ax.transAxes, fontsize=9, color="0.5")
+            transform=ax.transAxes, fontsize=int(9*text_size), color="0.5")
     
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8,
               ncol=2)
-    ax.tick_params(labelsize=9, colors="0.4")
+    ax.tick_params(labelsize=int(9*text_size), colors="0.4")
     ax.autoscale_view()
     
     plt.tight_layout()
@@ -615,6 +702,11 @@ def plot_trajectory_3d(
     title:         str   = None,
     elev:          float = 20,
     azim:          float = 45,
+    text_size:     float = 1.0,
+    x_label:       str   = None,
+    y_label:       str   = None,
+    z_label:       str   = None,
+    show_n_trials: bool = False,
 ) -> None:
     """
     Plot individual trial trajectories as faint grey lines and their mean
@@ -662,7 +754,7 @@ def plot_trajectory_3d(
     ax.plot(mx, my, mz,
             color=mean_color,
             linewidth=mean_linewidth,
-            label=f"{group_label}  (n={n_trials})",
+            label=f"{group_label}  (n={n_trials})" if show_n_trials else group_label,
             zorder=5)
 
     if show_start_end:
@@ -671,18 +763,19 @@ def plot_trajectory_3d(
         ax.scatter(mx[-1], my[-1], mz[-1],
                    color="red",   s=60, zorder=6, label="End")
 
-    ax.set_xlabel("X (mm)", fontsize=10, color="0.3", labelpad=6)
-    ax.set_ylabel("Y (mm)", fontsize=10, color="0.3", labelpad=6)
-    ax.set_zlabel("Z (mm)", fontsize=10, color="0.3", labelpad=6)
+    ax.set_xlabel(x_label if x_label is not None else "X (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
+    ax.set_ylabel(y_label if y_label is not None else "Y (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
+    ax.set_zlabel(z_label if z_label is not None else "Z (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
 
-    default_title = f"{variable_base}  ·  3-D trajectory  ·  {group_label}"
-    ax.set_title(title or default_title,
-                 fontsize=12, fontweight="medium", pad=12)
+    if title is None:
+        title = f"{variable_base}  ·  3-D trajectory  ·  {group_label}"
+    ax.set_title(title,
+                 fontsize=int(12*text_size), fontweight="medium", pad=12)
     ax.text2D(0.0, 0.97,
-              f"Mean ± individual trials  ·  {n_trials} trial{'s' if n_trials != 1 else ''}",
-              transform=ax.transAxes, fontsize=9, color="0.5")
+              f"Mean ± individual trials  ·  {n_trials} trial{'s' if n_trials != 1 else ''}" if show_n_trials else "Mean ± individual trials",
+              transform=ax.transAxes, fontsize=int(9*text_size), color="0.5")
 
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8)
     ax.view_init(elev=elev, azim=azim)
     plt.tight_layout()
@@ -704,6 +797,11 @@ def plot_trajectory_3d_comparison(
     title:          str   = None,
     elev:           float = 20,
     azim:           float = 45,
+    text_size:      float = 1.0,
+    x_label:        str   = None,
+    y_label:        str   = None,
+    z_label:        str   = None,
+    show_n_trials:  bool = False,
 ) -> None:
     """
     Overlay Expert and Novice mean 3-D trajectories with their individual
@@ -747,7 +845,7 @@ def plot_trajectory_3d_comparison(
     ax.plot(mx_e, my_e, mz_e,
             color=_C["expert"],
             linewidth=mean_linewidth,
-            label=f"Experts mean  (n={ex_x.shape[0]})",
+            label=f"Experts mean  (n={ex_x.shape[0]})" if show_n_trials else "Experts mean",
             zorder=5)
     if show_start_end:
         ax.scatter(mx_e[0],  my_e[0],  mz_e[0],
@@ -771,7 +869,7 @@ def plot_trajectory_3d_comparison(
     ax.plot(mx_n, my_n, mz_n,
             color=_C["novice"],
             linewidth=mean_linewidth,
-            label=f"Novices mean  (n={nv_x.shape[0]})",
+            label=f"Novices mean  (n={nv_x.shape[0]})" if show_n_trials else "Novices mean",
             zorder=5)
     if show_start_end:
         ax.scatter(mx_n[0],  my_n[0],  mz_n[0],
@@ -779,17 +877,18 @@ def plot_trajectory_3d_comparison(
         ax.scatter(mx_n[-1], my_n[-1], mz_n[-1],
                    color=_C["novice"], s=60, marker="^", zorder=6)
 
-    ax.set_xlabel("X (mm)", fontsize=10, color="0.3", labelpad=6)
-    ax.set_ylabel("Y (mm)", fontsize=10, color="0.3", labelpad=6)
-    ax.set_zlabel("Z (mm)", fontsize=10, color="0.3", labelpad=6)
+    ax.set_xlabel(x_label if x_label is not None else "X (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
+    ax.set_ylabel(y_label if y_label is not None else "Y (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
+    ax.set_zlabel(z_label if z_label is not None else "Z (mm)", fontsize=int(10*text_size), color="0.3", labelpad=6)
 
-    default_title = f"{variable_base}  ·  3-D trajectory  ·  Experts vs Novices"
-    ax.set_title(title or default_title,
-                 fontsize=12, fontweight="medium", pad=12)
+    if title is None:
+        title = f"{variable_base}  ·  3-D trajectory  ·  Experts vs Novices"
+    ax.set_title(title,
+                 fontsize=int(12*text_size), fontweight="medium", pad=12)
     ax.text2D(0.0, 0.97, "Mean + individual trials  ·  circle = start, triangle = end",
-              transform=ax.transAxes, fontsize=9, color="0.5")
+              transform=ax.transAxes, fontsize=int(9*text_size), color="0.5")
 
-    ax.legend(frameon=True, fontsize=9, loc="upper right",
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
               framealpha=0.92, edgecolor="0.88", borderpad=0.8, ncol=2)
     ax.view_init(elev=elev, azim=azim)
     plt.tight_layout()
@@ -842,13 +941,10 @@ AMOvariables = [
  
 if __name__ == "__main__":
     # Example usage with movement argument
-    movement = "roundhouse"  # or "roundhouse", "teep", etc.
-    plot_mean_sd_comparison(
-        variable = "R_ShankAMAC",
-        movement = movement,
-        label = "Right Shank AMA")
-        
-"""    # Single group — all expert trials + mean
+    movement = "uppercut"  # or "roundhouse", "teep", etc.
+    
+       
+    """    # Single group — all expert trials + mean
     plot_trajectory_3d(
         variable_base = "R_WRIST_POSITION",
         movement      = movement,
@@ -864,30 +960,55 @@ if __name__ == "__main__":
         mean_color    = _C["expert"],
     )
     plot_trajectory_3d(
-        variable_base = "R_WRIST_POSITION",
+        variable_base = "L_W_POSITION",
         movement      = movement,
         group         = e3,
         group_label   = "Experts",
         mean_color    = _C["expert"],
     )
-
+    
     # Expert vs Novice comparison
+    
     plot_trajectory_3d_comparison(
         variable_base = "R_WRIST_POSITION",
         movement      = movement,
+        text_size= 1.3
     )
-    
+    plot_mean_sd_comparison(
+        variable = "R_WRIST_POSITION_X",
+        movement = movement,
+        label = "Right hand X position",
+        text_size = 1.3
+    )
+    plot_mean_sd_comparison(
+        variable = "R_WRIST_POSITION_Y",
+        movement = movement,
+        label = "Right hand Y position",
+        text_size = 1.3
+    )
+    """
+    plot_mean_sd_comparison(
+        variable = "R_WRIST_POSITION_Z",
+        movement = movement,
+        label = "Right hand Z position",
+        text_size = 1.3
+    )
+    plot_mean_s
+    """
     plot_mean_sd_norm(
         variable_base = "R_Foot_CoG_vel",
         movement      = movement,
         group=experts,
     )
+
     plot_mean_sd_comparison_norm(
-        variable_base = "R_Foot_CoG_vel",
+        variable_base = "L_",
         movement      = movement,
         label         = "Right Foot CoG Velocity (norm)",
-    )"""
-""" analyze_norm_max_per_trial(
+        text_size= 1.7
+    )
+
+    analyze_norm_max_per_trial(
         variable_base = "R_Hand_CoG_vel",
         movement      = movement,
     )"""

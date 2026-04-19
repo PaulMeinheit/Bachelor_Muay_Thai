@@ -67,27 +67,31 @@ def resamplePhase(phase_df, num_frames):
     
     return out_df.reset_index(drop=True)
 
-def scaleDirectoryBeginningToEnd(input_dir, segments, output_dir, output_subdir):
+def scaleDirectoryBeginningToImpactToEnd(input_dir, segments, output_dir, output_subdir):
     data = Dataloader.load_csvs_from_dir(input_dir)
-    scaleToBeginningAndEnd(data, segments, output_dir, output_subdir)   
+    scaleToBeginningImpactAndEnd(data, segments, output_dir, output_subdir)   
 
-def scaleToBeginningAndEnd(data, segments, output_dir, output_subdir):
+def scaleToBeginningImpactAndEnd(data, segments, output_dir, output_subdir):
     i = 0
     for filename, df in data.items():
         # Each file corresponds to one segment at index i
-        scaled_df = scaleDataFrameToBeginningAndEnd(df, segments[i])
+        scaled_df = scaleDataFrameToBeginningImpactAndEnd(df, segments[i])
         output_path = os.path.join(output_dir, output_subdir)
         os.makedirs(output_path, exist_ok=True)
         # Preserve MultiIndex header structure when writing CSV
         scaled_df.to_csv(os.path.join(output_path, "scaled" + str(i)), index=False, header=True)
         i += 1
-def scaleDataFrameToBeginningAndEnd(df, segment):
+def scaleDataFrameToBeginningImpactAndEnd(df, segment):
     # segment is [phase0_start, phase0_end, phase1_end, phase2_end, phase3_end]
     # We resample the entire segment to a fixed number of frames (100)
-    num_frames = 100
+    num_frames = 50
     
-    segment_df = df.iloc[segment[0]:segment[1]]
+    phase0 = df.iloc[segment[0]:segment[1]]
+    phase1 = df.iloc[segment[1]:segment[2]]
     
-    scaled_segment = resamplePhase(segment_df, num_frames)
+    firstSegment = resamplePhase(phase0, num_frames)
+    secondSegment = resamplePhase(phase1, num_frames)
     
-    return scaled_segment.reset_index(drop=True)        
+    scaled_phases = [firstSegment, secondSegment]
+    
+    return pd.concat(scaled_phases, ignore_index=True)  
