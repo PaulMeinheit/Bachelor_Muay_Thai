@@ -19,6 +19,8 @@ Usage
   3. Run:  python plot_biomechanics.py
 """
  
+from pydoc import text
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -63,7 +65,7 @@ FADE_EDGES  = 0.12       # fraction of trial to fade in/out (0 = hard edges)
 FIG_SIZE    = (15, 7.5)
  
 SAVE_DIR = (
-    "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Plots/UppercutMeanSdComparision/AMA"
+    "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Plots/ToLookAt/AngMomAndFriends/TotalAngMom"
 )
  
 # Thesis colour palette — muted, distinct, greyscale-safe
@@ -461,35 +463,65 @@ def plot_mean_sd_comparison(
     ax.autoscale_view()
 
     plt.tight_layout()
-    plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_comparison.png", dpi=300)
-    plt.show()
-
+    plt.savefig(f"{SAVE_DIR}/_{movement}_{variable}_comparison.png", dpi=300)
+    #plt.show()
 
 def plot_mean_sd_FirstGradientComparison(
-    variable:    str,
-    movement:    str,
-    shade_alpha: float = SHADE_ALPHA,
-    fade_edges:  float = FADE_EDGES,
-    fig_size:    tuple = FIG_SIZE,
-    label:       str   = None,
-    text_size:   float = 1.0,
-    title:       str   = None,
-    x_label:     str   = None,
-    y_label:     str   = None,
-    show_n_trials: bool = False,
+    variable_base: str,
+    movement:      str,
+    shade_alpha:   float = SHADE_ALPHA,
+    fade_edges:    float = FADE_EDGES,
+    fig_size:      tuple = FIG_SIZE,
+    label:         str   = None,
+    text_size:     float = 1.0,
+    title:         str   = None,
+    x_label:       str   = None,
+    y_label:       str   = None,
+    show_n_trials: bool  = False,
 ) -> None:
+    """
+    Plot the Euclidean norm of the first time-derivative (gradient) of a
+    3-D vector variable, comparing Experts vs Novices with mean ± SD bands.
+
+    For angular momentum L = (L_x, L_y, L_z) this yields ||dL/dt||,
+    i.e. the magnitude of the net torque acting on the segment over time.
+
+    Parameters
+    ----------
+    variable_base : base name WITHOUT the _X/_Y/_Z suffix,
+                    e.g. "R_shoulder_angular_momentum"
+                    → uses _X, _Y, _Z columns.
+    movement      : movement type string passed to load_group().
+    """
     df_experts = load_group(experts, movement)
     df_novices = load_group(novices, movement)
 
-    t_exp, mat_exp = build_matrix(df_experts, variable)
-    t_nov, mat_nov = build_matrix(df_novices, variable)
+    # ── Load all three components ─────────────────────────────────────────────
+    t_exp, mat_x_exp = build_matrix(df_experts, f"{variable_base}_X")
+    _,     mat_y_exp = build_matrix(df_experts, f"{variable_base}_Y")
+    _,     mat_z_exp = build_matrix(df_experts, f"{variable_base}_Z")
 
-    # Compute first gradient per trial along the time axis
-    grad_exp = np.array([np.gradient(row, t_exp) for row in mat_exp])
-    grad_nov = np.array([np.gradient(row, t_nov) for row in mat_nov])
+    t_nov, mat_x_nov = build_matrix(df_novices, f"{variable_base}_X")
+    _,     mat_y_nov = build_matrix(df_novices, f"{variable_base}_Y")
+    _,     mat_z_nov = build_matrix(df_novices, f"{variable_base}_Z")
 
-    mean_exp = grad_exp.mean(axis=0);  std_exp = grad_exp.std(axis=0, ddof=1)
-    mean_nov = grad_nov.mean(axis=0);  std_nov = grad_nov.std(axis=0, ddof=1)
+    # ── Gradient of each component per trial, then norm ───────────────────────
+    # grad shape: (n_trials, n_frames)
+    grad_norm_exp = np.sqrt(
+        np.array([np.gradient(row, t_exp) for row in mat_x_exp]) ** 2 +
+        np.array([np.gradient(row, t_exp) for row in mat_y_exp]) ** 2 +
+        np.array([np.gradient(row, t_exp) for row in mat_z_exp]) ** 2
+    )
+
+    grad_norm_nov = np.sqrt(
+        np.array([np.gradient(row, t_nov) for row in mat_x_nov]) ** 2 +
+        np.array([np.gradient(row, t_nov) for row in mat_y_nov]) ** 2 +
+        np.array([np.gradient(row, t_nov) for row in mat_z_nov]) ** 2
+    )
+
+    # ── Statistics ────────────────────────────────────────────────────────────
+    mean_exp = grad_norm_exp.mean(axis=0);  std_exp = grad_norm_exp.std(axis=0, ddof=1)
+    mean_nov = grad_norm_nov.mean(axis=0);  std_nov = grad_norm_nov.std(axis=0, ddof=1)
 
     fig, ax = plt.subplots(figsize=fig_size)
 
@@ -511,20 +543,37 @@ def plot_mean_sd_FirstGradientComparison(
 
     _apply_grid(ax)
 
-    ax.set_xlabel(x_label if x_label is not None else "scaled time", fontsize=int(16*text_size), color="0.3", labelpad=6)
-    ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(16*text_size), color="0.3", labelpad=6)
+    # ── Labels ────────────────────────────────────────────────────────────────
+    ax.set_xlabel(
+        x_label if x_label is not None else "scaled time",
+        fontsize=int(16 * text_size), color="0.3", labelpad=6,
+    )
+
+    if label is None:
+        label = f"‖d/dt {_format_variable_label(variable_base)}‖"
+
+    ax.set_ylabel(
+        y_label if y_label is not None else label,
+        fontsize=int(16 * text_size), color="0.3", labelpad=6,
+    )
+
     if title is None:
         title = label
+    ax.set_title(title, fontsize=int(20 * text_size), fontweight="medium", pad=12, loc="left")
+    ax.text(0.0, 1.02, "Experts vs Novices  ·  Mean ± 1 SD  ·  ‖dL/dt‖",
+            transform=ax.transAxes, fontsize=int(9 * text_size), color="0.5")
 
-    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
-              framealpha=0.92, edgecolor="0.88", borderpad=0.5,
-              ncol=2)
-    ax.tick_params(labelsize=int(14*text_size), colors="0.4")
+    ax.legend(frameon=True, fontsize=int(9 * text_size), loc="upper right",
+              framealpha=0.92, edgecolor="0.88", borderpad=0.5, ncol=2)
+    ax.tick_params(labelsize=int(14 * text_size), colors="0.4")
     ax.autoscale_view()
 
     plt.tight_layout()
-    plt.savefig(f"{SAVE_DIR}/{variable}_{movement}_firstgradient_comparison.png", dpi=300)
-    plt.show()
+    plt.savefig(
+        f"{SAVE_DIR}/{variable_base}_{movement}_gradient_norm_comparison.png",
+        dpi=300,
+    )
+    #plt.show()
 
 # ──────────────────────────────────────────────────────────────────────────────
 # PLOTTING — norm comparison (2-D mean ± SD)
@@ -608,6 +657,84 @@ def plot_mean_sd_norm(
 
 
 def plot_mean_sd_comparison_norm(
+    variable_base: str,
+    movement:      str,
+    shade_alpha:   float = SHADE_ALPHA,
+    fade_edges:    float = FADE_EDGES,
+    fig_size:      tuple = FIG_SIZE,
+    label:         str   = None,
+    text_size:     float = 1.0,
+    title:         str   = None,
+    x_label:       str   = None,
+    y_label:       str   = None,
+    show_n_trials: bool = False,
+) -> None:
+    """
+    Plot the Euclidean norm of a multivariate variable comparing Experts vs Novices
+    with mean ± SD bands.
+    
+    Parameters
+    ----------
+    variable_base  : base name WITHOUT the _X/_Y/_Z suffix,
+                     e.g. "R_shoulder_CoG_velocity"  →  uses _X, _Y, _Z columns.
+    movement       : movement type string.
+    shade_alpha    : opacity of the ± 1 SD band.
+    fade_edges     : fraction of trial to fade in/out (0 = hard edges).
+    fig_size       : figure size tuple.
+    label          : custom label for the y-axis (if None, auto-generated).
+    """
+    df_experts = load_group(experts, movement)
+    df_novices = load_group(novices, movement)
+    
+    t_exp, norm_exp = build_norm_matrix(df_experts, variable_base)
+    t_nov, norm_nov = build_norm_matrix(df_novices, variable_base)
+    
+    mean_exp = norm_exp.mean(axis=0);  std_exp = norm_exp.std(axis=0, ddof=1)
+    mean_nov = norm_nov.mean(axis=0);  std_nov = norm_nov.std(axis=0, ddof=1)
+    
+    fig, ax = plt.subplots(figsize=fig_size)
+    
+    # Experts band + mean
+    _faded_band(ax, t_exp, mean_exp - std_exp, mean_exp + std_exp,
+                face_color=_C["expert"], edge_color=_C["expert"],
+                max_alpha=shade_alpha, fade=fade_edges,
+                label="Experts  ±1 SD")
+    ax.plot(t_exp, mean_exp,
+            color=_C["expert"], linewidth=2.0, label="Experts  mean", zorder=4)
+    
+    # Novices band + mean
+    _faded_band(ax, t_nov, mean_nov - std_nov, mean_nov + std_nov,
+                face_color=_C["novice"], edge_color=_C["novice"],
+                max_alpha=shade_alpha, fade=fade_edges,
+                label="Novices  ±1 SD")
+    ax.plot(t_nov, mean_nov,
+            color=_C["novice"], linewidth=2.0, label="Novices  mean", zorder=4)
+    
+    _apply_grid(ax)
+    
+    ax.set_xlabel("scaled time", fontsize=int(11*text_size), color="0.3", labelpad=6)
+    
+    # Auto-generate label if not provided
+    if label is None:
+        label = f"{_format_variable_label(variable_base)} (norm)"
+    
+    ax.set_ylabel(y_label if y_label is not None else label, fontsize=int(11*text_size), color="0.3", labelpad=6)
+    if title is None:
+        title = ""
+    ax.set_title(title, fontsize=int(13*text_size), fontweight="medium", pad=12, loc="left")
+    
+    
+    ax.legend(frameon=True, fontsize=int(9*text_size), loc="upper right",
+              framealpha=0.92, edgecolor="0.88", borderpad=0.8,
+              ncol=2)
+    ax.tick_params(labelsize=int(9*text_size), colors="0.4")
+    ax.autoscale_view()
+    #plt.savefig(f"{SAVE_DIR}/_{movement}_{variable_base}_TotalAngMomcomparison.png", dpi=300)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_mean_sd_comparisonFirstDiff_norm(
     variable_base: str,
     movement:      str,
     shade_alpha:   float = SHADE_ALPHA,
@@ -936,14 +1063,32 @@ AMOvariables = [
     "L_ThighAMOC","R_ThighAMOC","L_ShankAMOC","R_ShankAMOC",
     "L_FootAMOC","R_FootAMOC",
 ]
- 
+AngMomcols = ['FullBody_AngMom_X','FullBody_AngMom_Y','FullBody_AngMom_Z','L_Hand_X','L_Hand_Y','L_Hand_Z','R_Hand_X','R_Hand_Y','R_Hand_Z','L_FA_X','L_FA_Y','L_FA_Z','R_FA_X','R_FA_Y','R_FA_Z','L_UA_X','L_UA_Y','L_UA_Z','R_UA_X','R_UA_Y','R_UA_Z','Head_X','Head_Y','Head_Z','Trunk_X','Trunk_Y','Trunk_Z','Pelvis_X','Pelvis_Y','Pelvis_Z','L_Thigh_X','L_Thigh_Y','L_Thigh_Z','R_Thigh_X','R_Thigh_Y','R_Thigh_Z','L_Shank_X','L_Shank_Y','L_Shank_Z','R_Shank_X','R_Shank_Y','R_Shank_Z','L_Foot_X','L_Foot_Y','L_Foot_Z','R_Foot_X','R_Foot_Y','R_Foot_Z']
+AngMomBases = [
+    'FullBody_AngMom',
+    'L_Hand',
+    'R_Hand',
+    'L_FA',
+    'R_FA',
+    'L_UA',
+    'R_UA',
+    'Head',
+    'Trunk',
+    'Pelvis',
+    'L_Thigh',
+    'R_Thigh',
+    'L_Shank',
+    'R_Shank',
+    'L_Foot',
+    'R_Foot',
+]
 # ──────────────────────────────────────────────────────────────────────────────
 # ENTRY POINT
 # ──────────────────────────────────────────────────────────────────────────────
  
 if __name__ == "__main__":
     # Example usage with movement argument
-    movement = "uppercut"  # or "roundhouse", "teep", etc.
+    movement = "elbow"  # or "roundhouse", "teep", etc.
     
        
     """    # Single group — all expert trials + mean
@@ -982,15 +1127,33 @@ if __name__ == "__main__":
         label = "Right hand X position",
         text_size = 1.3
     )
-    plot_mean_sd_comparison(
-        variable = "R_WRIST_POSITION_Y",
-        movement = movement,
-        label = "Right hand Y position",
-        text_size = 1.3
+    
+    for variable in AngMomcols:
+        plot_mean_sd_comparison(
+            variable= variable,
+            movement = movement,
+            label = variable,
+            text_size = 1.3
     )
     """
     
-    """
+
+    plot_mean_sd_comparison_norm(
+            variable_base= "FullBody_AngMom",
+            movement= "elbow",
+            y_label= "Total body angular momentum kg$\cdot$m²/s",
+            text_size=1.5,
+    )
+"""
+        plot_mean_sd_FirstGradientComparison(
+            variable_base= base,
+            movement= movement,
+            label= base,
+            text_size=1.2,
+        )
+    
+    
+    
     plot_mean_sd_norm(
         variable_base = "R_Foot_CoG_vel",
         movement      = movement,

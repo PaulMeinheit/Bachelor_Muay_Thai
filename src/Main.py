@@ -6,6 +6,7 @@ import Averager
 import Dataloader
 import matplotlib.pyplot as plt
 import Centerer
+import Renamer
 # Structured dataset: subject -> movement -> frame types
 
 data = {
@@ -162,7 +163,7 @@ data = {
 }
 
 subjects = ["E1", "E2", "E3", "N1", "N2", "N3", "N4"]
-movements = ["teep", "roundhouse"]
+movements = ["roundhouse", "teep"]
 subjectmovemntExclusions = {
     ("E1", "teep") : [],
     ("E1", "roundhouse") : [],
@@ -192,13 +193,13 @@ for subject in subjects:
             SlicedResultsPath = "scaled_Data/processed_JustAngMomData/" +trialPath + "/sliced"
             scaledResultPath = "scaled_Data/processed_JustAngMomData/" + trialPath + "/scaled"
             flattenedResultPath = "Processed_Data/processed_JustAngMomData/" + trialPath + "/flattened"
+            renamedResultsPath = "scaled_Data/processed_OnlyAngMom/" + trialPath + "/scaled"
             #centeredResultPath = "Processed_Data/processed_visual3dData/" + trialPath + "/centered"
             segmentLiftFrames = data[subject][movement]["lift"]
             segmentImpactFrames = data[subject][movement]["impact"]
             segmentFootDownFrames = data[subject][movement]["foot_down"]
             
             # Frame numbers for each segment phase boundary
-            
             #segmentEndFrames = data[subject][movement]["end"]
             #segmentMiddleFrame = data[subject][movement]["impact"]
             #segmentBeginFrames = data[subject][movement]["start"]
@@ -217,18 +218,20 @@ for subject in subjects:
                     segmentFootDownFrames,
             
             )    
-            #Segments = Slicer.findElbowUpperSegments(
-            #        segmentBeginFrames,
-            #        segmentMiddleFrame,
-            #        segmentEndFrames,
-            #        randomDataPath
-            #)
+            """Segments = Slicer.findElbowUpperSegments(
+                    segmentBeginFrames,
+                    segmentMiddleFrame,
+                    segmentEndFrames,
+                    randomDataPath
+            )
+            """
             for directory in sorted(os.listdir(SlicedResultsPath)):
                 
                 print(directory)
                 Scaler.scaleDirectoryToFourPhases(os.path.join(SlicedResultsPath, directory), Segments, scaledResultPath, directory)
-            
                 #Scaler.scaleDirectoryBeginningToImpactToEnd(os.path.join(SlicedResultsPath, directory),Segments, scaledResultPath, directory)
+
+            Renamer.renameDirectory(scaledResultPath + "/AngMom",renamedResultsPath)
             #for directory in sorted(os.listdir(scaledResultPath)):
                 #Flattener.flattenDirectory(os.path.join(scaledResultPath, directory), os.path.join(flattenedResultPath, directory))
             #Centerer.center_cog(os.path.join(flattenedResultPath, "JointPositions"), os.path.join(centeredResultPath, "JointPositions"))
