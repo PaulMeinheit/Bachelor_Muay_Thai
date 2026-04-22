@@ -289,8 +289,8 @@ def plot_com_projection_comparison_clean(
 # ENTRY POINT
 # ──────────────────────────────────────────────────────────────────────────────
 
-X_VAR = "L_ELBOW_POSITION_X"   # variable name for the fore-aft axis
-Y_VAR = "L_ELBOW_POSITION_Y"   # variable name for the vertical axis
+X_VAR = "R_Hand_CoG_pos_Y"   # variable name for the fore-aft axis
+Y_VAR = "R_Hand_CoG_pos_Z"   # variable name for the vertical axis
 # How many evenly-spaced frames at which to draw SD ellipses.
 N_ELLIPSES = 0
 # Opacity of individual trial traces.
@@ -298,7 +298,7 @@ TRIAL_ALPHA = 0.2
 # Figure size in inches.
 FIG_SIZE = (15, 10)
 GROUP = experts
-MOVEMENT = "elbow"
+MOVEMENT = "uppercut"
 
 if __name__ == "__main__":
     """
@@ -331,11 +331,11 @@ if __name__ == "__main__":
         movement    = MOVEMENT,
         x_var       = X_VAR,
         y_var       = Y_VAR,
-        x_Name      = X_VAR,
-        y_Name      = Y_VAR,
+        x_Name      = "Right Hand Y (m)",
+        y_Name      = "Right Hand Z (m)",
         fig_size    = FIG_SIZE,
-        text_size=1.7,
-        x_label= "Left Elbow X (m)",
-        y_label= "Left Elbow Y (m)",
-        title=f"Left Elbow Position: Experts vs Novices"
+        text_size=1.9,
+        x_label= "Right Hand Y (m)",
+        y_label= "Right Hand Z (m)",
+        title=f"Right Hand Position: Experts vs Novices"
     )

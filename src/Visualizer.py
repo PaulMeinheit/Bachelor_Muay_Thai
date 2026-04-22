@@ -1139,10 +1139,10 @@ if __name__ == "__main__":
     
 
     plot_mean_sd_comparison_norm(
-            variable_base= "FullBody_AngMom",
-            movement= "elbow",
-            y_label= "Total body angular momentum kg$\cdot$m²/s",
-            text_size=1.5,
+            variable_base= "R_Hand",
+            movement= "uppercut",
+            y_label= "Right hand angular momentum kg$\cdot$m²/s",
+            text_size=1.7,
     )
 """
         plot_mean_sd_FirstGradientComparison(
