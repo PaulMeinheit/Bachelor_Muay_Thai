@@ -463,8 +463,8 @@ def plot_mean_sd_comparison(
     ax.autoscale_view()
 
     plt.tight_layout()
-    plt.savefig(f"{SAVE_DIR}/_{movement}_{variable}_comparison.png", dpi=300)
-    #plt.show()
+    #plt.savefig(f"{SAVE_DIR}/_{movement}_{variable}_comparison.png", dpi=300)
+    plt.show()
 
 def plot_mean_sd_FirstGradientComparison(
     variable_base: str,
@@ -1088,7 +1088,7 @@ AngMomBases = [
  
 if __name__ == "__main__":
     # Example usage with movement argument
-    movement = "elbow"  # or "roundhouse", "teep", etc.
+    movement = "teep"  # or "roundhouse", "teep", etc.
     
        
     """    # Single group — all expert trials + mean
@@ -1120,14 +1120,14 @@ if __name__ == "__main__":
         variable_base = "R_WRIST_POSITION",
         movement      = movement,
         text_size= 1.3
-    )
+    )"""
     plot_mean_sd_comparison(
-        variable = "R_WRIST_POSITION_X",
+        variable = "Pelvis_CoG_pos_Z",
         movement = movement,
-        label = "Right hand X position",
-        text_size = 1.3
+        label = "Right knee angle X (deg)",
+        text_size = 1.2
     )
-    
+    """
     for variable in AngMomcols:
         plot_mean_sd_comparison(
             variable= variable,
@@ -1135,16 +1135,16 @@ if __name__ == "__main__":
             label = variable,
             text_size = 1.3
     )
-    """
+    
     
 
     plot_mean_sd_comparison_norm(
-            variable_base= "R_Hand",
-            movement= "uppercut",
+            variable_base= "R_foot",
+            movement= "teep",
             y_label= "Right hand angular momentum kg$\cdot$m²/s",
             text_size=1.7,
     )
-"""
+
         plot_mean_sd_FirstGradientComparison(
             variable_base= base,
             movement= movement,

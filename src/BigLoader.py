@@ -58,7 +58,7 @@ def loadallspecified(subjects, movement) -> pd.DataFrame:
             continue
         if subject == "N1" and movement == "teep":
             continue
-        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/scaled_Data/processed_OnlyAngMom/"+ subject + "/"+ movement + "/scaled"
+        path = "/home/paul/Schreibtisch/Bachelorarbeit/Bachelor_Muay_Thai/Processed_Data/processed_visual3dData/" + subject + "/" + movement + "/centered/CoG_Position"
         
         if not os.path.exists(path):
             

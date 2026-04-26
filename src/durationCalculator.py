@@ -152,237 +152,184 @@ data = {
         }
     }
 }
-# ── helpers ──────────────────────────────────────────────────────────────────
- 
+
+# ── helpers ───────────────────────────────────────────────────────────────────
+
+# Technique config: maps technique name to its key names and label
+TECHNIQUE_CONFIG = {
+    "elbow":      {"start_key": "start",  "impact_key": "impact", "end_key": "end"},
+    "uppercut":   {"start_key": "start",  "impact_key": "impact", "end_key": "end"},
+    "roundhouse": {"start_key": "lift",   "impact_key": "impact", "end_key": "foot_down"},
+    "teep":       {"start_key": "lift",   "impact_key": "impact", "end_key": "foot_down"},
+}
+
+ALL_TECHNIQUES = list(TECHNIQUE_CONFIG.keys())
+
+
 def compute_durations(start_list, end_list):
-    """
-    Pair each start with its corresponding end and return a list of durations.
-    If one list is longer than the other, extra values are ignored with a warning.
-    """
     n_pairs = min(len(start_list), len(end_list))
     if len(start_list) != len(end_list):
         print(f"  ⚠  Length mismatch: {len(start_list)} starts vs {len(end_list)} ends "
               f"→ using first {n_pairs} pairs")
-    durations = [end_list[i]/120*1000 - start_list[i]/120*1000 for i in range(n_pairs)]
-    return durations
+    return [end_list[i]/120*1000 - start_list[i]/120*1000 for i in range(n_pairs)]
 
 
 def compute_phase_durations(start_list, impact_list, end_list):
-    """
-    Calculate start-to-impact and impact-to-end durations for each trial.
-    Returns two dictionaries with individual durations and stats.
-    
-    Parameters
-    ----------
-    start_list   : list of frame numbers at movement start
-    impact_list  : list of frame numbers at impact
-    end_list     : list of frame numbers at movement end
-    
-    Returns
-    -------
-    {
-        "start_to_impact": {
-            "individual": [dur1, dur2, ...],
-            "mean": float,
-            "std": float
-        },
-        "impact_to_end": {
-            "individual": [dur1, dur2, ...],
-            "mean": float,
-            "std": float
-        }
-    }
-    """
-    # Ensure all lists have the same length
     n_trials = min(len(start_list), len(impact_list), len(end_list))
-    
-    if len(start_list) != len(impact_list) or len(impact_list) != len(end_list):
+    if not (len(start_list) == len(impact_list) == len(end_list)):
         print(f"  ⚠  Length mismatch: {len(start_list)} starts, {len(impact_list)} impacts, "
               f"{len(end_list)} ends → using first {n_trials} trials")
-    
-    # Calculate durations for each phase
+
     start_to_impact = [impact_list[i]/120*1000 - start_list[i]/120*1000 for i in range(n_trials)]
-    impact_to_end   = [end_list[i]/120*1000 - impact_list[i]/120*1000 for i in range(n_trials)]
-    
-    # Compute statistics
-    start_to_impact_arr = np.array(start_to_impact)
-    impact_to_end_arr = np.array(impact_to_end)
-    
+    impact_to_end   = [end_list[i]/120*1000   - impact_list[i]/120*1000 for i in range(n_trials)]
+
     return {
         "start_to_impact": {
             "individual": start_to_impact,
-            "mean": np.mean(start_to_impact_arr),
-            "std": np.std(start_to_impact_arr, ddof=1)
+            "mean": np.mean(start_to_impact),
+            "std":  np.std(start_to_impact, ddof=1)
         },
         "impact_to_end": {
             "individual": impact_to_end,
-            "mean": np.mean(impact_to_end_arr),
-            "std": np.std(impact_to_end_arr, ddof=1)
+            "mean": np.mean(impact_to_end),
+            "std":  np.std(impact_to_end, ddof=1)
         }
     }
 
 
 # ── main calculation ──────────────────────────────────────────────────────────
- 
-results = {}          # per-participant, per-technique durations
- 
+
+results       = {}   # total durations
+phase_results = {}   # phase durations
+
 for participant, techniques in data.items():
-    results[participant] = {}
-    for technique in ("elbow", "uppercut"):
+    results[participant]       = {}
+    phase_results[participant] = {}
+
+    for technique, cfg in TECHNIQUE_CONFIG.items():
         if technique not in techniques:
             continue
- 
-        starts = techniques[technique]["start"]
-        ends   = techniques[technique]["end"]
- 
-        durations = compute_durations(starts, ends)
-        results[participant][technique] = durations
- 
- 
-# ── report ────────────────────────────────────────────────────────────────────
- 
+
+        t      = techniques[technique]
+        starts  = t[cfg["start_key"]]
+        impacts = t[cfg["impact_key"]]
+        ends    = t[cfg["end_key"]]
+
+        results[participant][technique]       = compute_durations(starts, ends)
+        phase_results[participant][technique] = compute_phase_durations(starts, impacts, ends)
+
+
+# ── total duration report ─────────────────────────────────────────────────────
+
 print("=" * 65)
 print("  DURATION ANALYSIS  (all values in ms)")
 print("=" * 65)
- 
+
 for participant, techniques in results.items():
     print(f"\n{'─'*65}")
     print(f"  Participant: {participant}")
     print(f"{'─'*65}")
     for technique, durations in techniques.items():
-        arr  = np.array(durations)
-        mean = np.mean(arr)
-        std  = np.std(arr, ddof=1)
+        arr = np.array(durations)
         print(f"  {technique.upper()}")
-        print(f"    Durations : {durations}")
-        print(f"    Mean      : {mean:.2f} ms")
-        print(f"    Std Dev   : {std:.2f} ms")
- 
+        print(f"    Durations : {[round(d,2) for d in durations]}")
+        print(f"    Mean      : {np.mean(arr):.2f} ms")
+        print(f"    Std Dev   : {np.std(arr, ddof=1):.2f} ms")
+
+
 # ── per-subject summary table ─────────────────────────────────────────────────
- 
+
 print(f"\n{'='*65}")
 print("  PER-SUBJECT SUMMARY")
 print(f"{'='*65}")
 print(f"  {'Subject':<10} {'Technique':<12} {'N':>4} {'Mean (ms)':>12} {'SD (ms)':>10}")
 print(f"  {'─'*10} {'─'*12} {'─'*4} {'─'*12} {'─'*10}")
- 
+
 for participant, techniques in results.items():
     for technique, durations in techniques.items():
-        arr  = np.array(durations)
-        mean = np.mean(arr)
-        std  = np.std(arr, ddof=1)
-        print(f"  {participant:<10} {technique:<12} {len(durations):>4} {mean:>12.2f} {std:>10.2f}")
- 
-# ── group-level stats (E and N separately, then overall) ─────────────────────
- 
+        arr = np.array(durations)
+        print(f"  {participant:<10} {technique:<12} {len(durations):>4} "
+              f"{np.mean(arr):>12.2f} {np.std(arr, ddof=1):>10.2f}")
+
+
+# ── group-level total duration stats ─────────────────────────────────────────
+
 group_durations = {
-    "E": {"elbow": [], "uppercut": []},
-    "N": {"elbow": [], "uppercut": []},
+    "E": {t: [] for t in ALL_TECHNIQUES},
+    "N": {t: [] for t in ALL_TECHNIQUES},
 }
- 
+
 for participant, techniques in results.items():
-    group = participant[0]          # "E" or "N"
+    group = participant[0]
     for technique, durations in techniques.items():
         group_durations[group][technique].extend(durations)
- 
+
 print(f"\n{'='*65}")
-print("  GROUP STATS")
+print("  GROUP STATS  (total duration)")
 print(f"{'='*65}")
- 
+
 for group_label, techniques in group_durations.items():
     print(f"\n  Group {group_label}")
     print(f"  {'Technique':<12} {'N':>4} {'Mean (ms)':>12} {'SD (ms)':>10}")
     print(f"  {'─'*12} {'─'*4} {'─'*12} {'─'*10}")
     for technique, durations in techniques.items():
-        arr  = np.array(durations)
-        mean = np.mean(arr)
-        std  = np.std(arr, ddof=1)
-        print(f"  {technique:<12} {len(durations):>4} {mean:>12.2f} {std:>10.2f}")
- 
-print()
-
-# ── PHASE DURATION ANALYSIS ───────────────────────────────────────────────────
-# Calculate start-to-impact and impact-to-end durations for each person
-
-print("=" * 80)
-print("  PHASE DURATION ANALYSIS  (start→impact vs impact→end)")
-print("=" * 80)
-
-phase_results = {}  # per-participant, per-technique phase durations
-
-for participant, techniques in data.items():
-    phase_results[participant] = {}
-    for technique in ("elbow", "uppercut"):
-        if technique not in techniques:
+        if not durations:
             continue
-        
-        starts   = techniques[technique]["start"]
-        impacts  = techniques[technique]["impact"]
-        ends     = techniques[technique]["end"]
-        
-        phase_durations = compute_phase_durations(starts, impacts, ends)
-        phase_results[participant][technique] = phase_durations
+        arr = np.array(durations)
+        print(f"  {technique:<12} {len(durations):>4} {np.mean(arr):>12.2f} {np.std(arr, ddof=1):>10.2f}")
 
 
-# ── Summary table ─────────────────────────────────────────────────────────────
+# ── phase duration report ─────────────────────────────────────────────────────
 
 print(f"\n{'='*80}")
-print("  PHASE DURATION SUMMARY TABLE")
+print("  PHASE DURATION ANALYSIS  (lift/start → impact  vs  impact → foot_down/end)")
 print(f"{'='*80}")
 print(f"  {'Subject':<10} {'Technique':<12} {'Phase':<16} {'N':>3} {'Mean (ms)':>12} {'SD (ms)':>10}")
 print(f"  {'─'*10} {'─'*12} {'─'*16} {'─'*3} {'─'*12} {'─'*10}")
 
 for participant in sorted(phase_results.keys()):
-    techniques = phase_results[participant]
-    for technique in sorted(techniques.keys()):
-        phases = techniques[technique]
-        
-        start_impact = phases["start_to_impact"]
-        print(f"  {participant:<10} {technique:<12} {'Start → Impact':<16} {len(start_impact['individual']):>3} "
-              f"{start_impact['mean']:>12.2f} {start_impact['std']:>10.2f}")
-        
-        impact_end = phases["impact_to_end"]
-        print(f"  {' ':<10} {' ':<12} {'Impact → End':<16} {len(impact_end['individual']):>3} "
-              f"{impact_end['mean']:>12.2f} {impact_end['std']:>10.2f}")
+    for technique in ALL_TECHNIQUES:
+        if technique not in phase_results[participant]:
+            continue
+        phases = phase_results[participant][technique]
 
-# ── Group-level statistics ────────────────────────────────────────────────────
+        si = phases["start_to_impact"]
+        ie = phases["impact_to_end"]
 
-print(f"\n{'='*80}")
-print("  GROUP STATISTICS (Experts vs Novices)")
-print(f"{'='*80}")
+        print(f"  {participant:<10} {technique:<12} {'Start → Impact':<16} "
+              f"{len(si['individual']):>3} {si['mean']:>12.2f} {si['std']:>10.2f}")
+        print(f"  {'':<10} {'':<12} {'Impact → End':<16} "
+              f"{len(ie['individual']):>3} {ie['mean']:>12.2f} {ie['std']:>10.2f}")
+
+
+# ── group-level phase stats ───────────────────────────────────────────────────
 
 group_phases = {
-    "Experts": {"elbow": {"start_to_impact": [], "impact_to_end": []},
-                "uppercut": {"start_to_impact": [], "impact_to_end": []}},
-    "Novices": {"elbow": {"start_to_impact": [], "impact_to_end": []},
-                "uppercut": {"start_to_impact": [], "impact_to_end": []}}
+    "Experts": {t: {"start_to_impact": [], "impact_to_end": []} for t in ALL_TECHNIQUES},
+    "Novices": {t: {"start_to_impact": [], "impact_to_end": []} for t in ALL_TECHNIQUES},
 }
 
 for participant, techniques in phase_results.items():
     group = "Experts" if participant[0] == "E" else "Novices"
-    
     for technique, phases in techniques.items():
-        group_phases[group][technique]["start_to_impact"].extend(
-            phases["start_to_impact"]["individual"]
-        )
-        group_phases[group][technique]["impact_to_end"].extend(
-            phases["impact_to_end"]["individual"]
-        )
+        group_phases[group][technique]["start_to_impact"].extend(phases["start_to_impact"]["individual"])
+        group_phases[group][technique]["impact_to_end"].extend(phases["impact_to_end"]["individual"])
 
-# Print group statistics
+print(f"\n{'='*80}")
+print("  GROUP PHASE STATISTICS (Experts vs Novices)")
+print(f"{'='*80}")
 print(f"  {'Group':<12} {'Technique':<12} {'Phase':<16} {'N':>3} {'Mean (ms)':>12} {'SD (ms)':>10}")
 print(f"  {'─'*12} {'─'*12} {'─'*16} {'─'*3} {'─'*12} {'─'*10}")
 
 for group in ("Experts", "Novices"):
-    for technique in ("elbow", "uppercut"):
-        start_impact_data = np.array(group_phases[group][technique]["start_to_impact"])
-        impact_end_data = np.array(group_phases[group][technique]["impact_to_end"])
-        
-        print(f"  {group:<12} {technique:<12} {'Start → Impact':<16} {len(start_impact_data):>3} "
-              f"{np.mean(start_impact_data):>12.2f} {np.std(start_impact_data, ddof=1):>10.2f}")
-        
-        print(f"  {' ':<12} {' ':<12} {'Impact → End':<16} {len(impact_end_data):>3} "
-              f"{np.mean(impact_end_data):>12.2f} {np.std(impact_end_data, ddof=1):>10.2f}")
+    for technique in ALL_TECHNIQUES:
+        si_data = np.array(group_phases[group][technique]["start_to_impact"])
+        ie_data = np.array(group_phases[group][technique]["impact_to_end"])
+        if len(si_data) == 0:
+            continue
+        print(f"  {group:<12} {technique:<12} {'Start → Impact':<16} "
+              f"{len(si_data):>3} {np.mean(si_data):>12.2f} {np.std(si_data, ddof=1):>10.2f}")
+        print(f"  {'':<12} {'':<12} {'Impact → End':<16} "
+              f"{len(ie_data):>3} {np.mean(ie_data):>12.2f} {np.std(ie_data, ddof=1):>10.2f}")
 
 print()
- 
